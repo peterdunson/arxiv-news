@@ -1,0 +1,123 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { votePaper } from '../api';
+
+export default function PaperCard({ paper, rank }) {
+  const navigate = useNavigate();
+  const [votes, setVotes] = useState(paper.vote_count);
+  const [voted, setVoted] = useState(false);
+
+  useEffect(() => {
+    const votedPapers = JSON.parse(localStorage.getItem('votedPapers') || '{}');
+    setVoted(!!votedPapers[paper.arxiv_id]);
+  }, [paper.arxiv_id]);
+
+  const handleVote = async (e) => {
+    e.preventDefault();
+    if (voted) return; // Already voted
+    
+    try {
+      const result = await votePaper(paper.arxiv_id, 'anonymous');
+      setVotes(result.vote_count);
+      setVoted(true);
+
+      const votedPapers = JSON.parse(localStorage.getItem('votedPapers') || '{}');
+      votedPapers[paper.arxiv_id] = true;
+      localStorage.setItem('votedPapers', JSON.stringify(votedPapers));
+    } catch (error) {
+      console.error('Vote failed:', error);
+    }
+  };
+
+  const formatTimeAgo = (dateStr) => {
+    const now = new Date();
+    const published = new Date(dateStr);
+    const diffInHours = Math.floor((now - published) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'just now';
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return `${diffInDays} days ago`;
+    const diffInMonths = Math.floor(diffInDays / 30);
+    return `${diffInMonths} months ago`;
+  };
+
+  const getHostname = (url) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch {
+      return 'arxiv.org';
+    }
+  };
+
+  const formatAuthors = (authors) => {
+    if (authors.length === 0) return 'unknown';
+    return authors[0].split(' ').pop(); // Get last name of first author
+  };
+
+  return (
+    <>
+      {/* Title Row */}
+      <tr className="athing">
+        <td style={{ textAlign: 'right', verticalAlign: 'top' }} className="title">
+          <span className="rank">{rank}.</span>
+        </td>
+        <td style={{ verticalAlign: 'top' }} className="votelinks">
+          <div style={{ textAlign: 'center' }}>
+            <a
+              className={voted ? 'nosee' : ''}
+              onClick={handleVote}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="votearrow" title="upvote" />
+            </a>
+          </div>
+        </td>
+        <td className="title">
+          <a
+            className="storylink"
+            onClick={() => navigate(`/paper/${paper.arxiv_id}`)}
+            style={{ cursor: 'pointer' }}
+          >
+            {paper.title}
+          </a>
+          <span className="sitebit comhead">
+            {' '}
+            (
+            <a href={paper.arxiv_url} target="_blank" rel="noopener noreferrer">
+              <span className="sitestr">{getHostname(paper.arxiv_url)}</span>
+            </a>
+            )
+          </span>
+        </td>
+      </tr>
+
+      {/* Details Row */}
+      <tr>
+        <td colSpan={2} />
+        <td className="subtext">
+          <span className="score">{votes} points</span>
+          {' by '}
+          <a className="hnuser">{formatAuthors(paper.authors)}</a>
+          {' '}
+          <span className="age">
+            <a onClick={() => navigate(`/paper/${paper.arxiv_id}`)} style={{ cursor: 'pointer' }}>
+              {formatTimeAgo(paper.published)}
+            </a>
+          </span>
+          {' | '}
+          <a onClick={() => navigate(`/paper/${paper.arxiv_id}`)} style={{ cursor: 'pointer' }}>
+            {paper.comment_count === 0
+              ? 'discuss'
+              : paper.comment_count === 1
+              ? '1 comment'
+              : `${paper.comment_count} comments`}
+          </a>
+        </td>
+      </tr>
+
+      {/* Spacer Row */}
+      <tr className="spacer" style={{ height: 5 }} />
+    </>
+  );
+}
