@@ -1,6 +1,10 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 export default function Navbar() {
+  const [searchParams] = useSearchParams();
+  const currentSort = searchParams.get('sort') || 'hot';
+  const currentCat = searchParams.get('cat') || 'all';
+
   return (
     <tr>
       <td style={{ backgroundColor: '#ff6600', padding: '0px' }}>
@@ -27,16 +31,20 @@ export default function Navbar() {
                   <b className="hnname">
                     <Link to="/" style={{ color: '#000000' }}>arXiv News</Link>
                   </b>
-                  <Link to="/?cat=all" style={{ color: '#000000' }}>all</Link> |{' '}
-                  <Link to="/?cat=cs.AI" style={{ color: '#000000' }}>ai</Link> |{' '}
-                  <Link to="/?cat=cs.LG" style={{ color: '#000000' }}>ml</Link> |{' '}
-                  <Link to="/?cat=cs.CL" style={{ color: '#000000' }}>nlp</Link> |{' '}
-                  <Link to="/?cat=cs.CV" style={{ color: '#000000' }}>vision</Link> |{' '}
-                  <Link to="/?cat=cs.RO" style={{ color: '#000000' }}>robotics</Link> |{' '}
-                  <Link to="/?cat=stat.ML" style={{ color: '#000000' }}>stats</Link> |{' '}
-                  <Link to="/?cat=math" style={{ color: '#000000' }}>math</Link> |{' '}
-                  <Link to="/?cat=physics" style={{ color: '#000000' }}>physics</Link> |{' '}
-                  <Link to="/?cat=quant-ph" style={{ color: '#000000' }}>quantum</Link>
+                  {' | '}
+                  <Link to={`/?sort=new&cat=${currentCat}`} style={{ color: '#000000' }}>new</Link> |{' '}
+                  <Link to={`/?sort=hot&cat=${currentCat}`} style={{ color: '#000000' }}>hot</Link> |{' '}
+                  <Link to={`/?sort=discussed&cat=${currentCat}`} style={{ color: '#000000' }}>discussed</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=all`} style={{ color: '#000000' }}>all</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=cs.AI`} style={{ color: '#000000' }}>ai</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=cs.LG`} style={{ color: '#000000' }}>ml</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=cs.CL`} style={{ color: '#000000' }}>nlp</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=cs.CV`} style={{ color: '#000000' }}>vision</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=cs.RO`} style={{ color: '#000000' }}>robotics</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=stat.ML`} style={{ color: '#000000' }}>stats</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=math`} style={{ color: '#000000' }}>math</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=physics`} style={{ color: '#000000' }}>physics</Link> |{' '}
+                  <Link to={`/?sort=${currentSort}&cat=quant-ph`} style={{ color: '#000000' }}>quantum</Link>
                 </span>
               </td>
               <td style={{ textAlign: 'right', padding: '0px', paddingRight: '4px' }}>

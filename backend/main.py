@@ -1,4 +1,6 @@
 import os
+import asyncio
+from datetime import datetime, timedelta
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -10,6 +12,9 @@ from models import Paper, Vote, Comment
 from pydantic import BaseModel
 
 app = FastAPI(title="arXiv News API")
+
+# Background task state
+last_scrape_time = None
 
 # CORS origins from environment variable or default to localhost
 CORS_ORIGINS = os.getenv(
@@ -26,10 +31,48 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Auto-scraper background task
+async def auto_scrape_papers():
+    """Background task that scrapes arXiv papers once per day"""
+    global last_scrape_time
+    
+    while True:
+        try:
+            # Run scraper
+            print(f"🔄 [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Running automatic paper scraper...")
+            
+            # Import and run scraper
+            from scraper import scrape_latest_papers
+            scrape_latest_papers(max_results=100)  # Fetch more papers for daily updates
+            
+            last_scrape_time = datetime.now()
+            print(f"✓ Scraper completed successfully. Next run in 24 hours.")
+            
+        except Exception as e:
+            print(f"❌ Error in auto-scraper: {e}")
+        
+        # Wait 24 hours before next run
+        await asyncio.sleep(24 * 60 * 60)  # 24 hours in seconds
+
 # Initialize database on startup
 @app.on_event("startup")
-def startup():
+async def startup():
     init_db()
+    
+    # Run scraper immediately on startup
+    print("🚀 Running initial paper scrape...")
+    try:
+        from scraper import scrape_latest_papers
+        scrape_latest_papers(max_results=100)
+        global last_scrape_time
+        last_scrape_time = datetime.now()
+        print("✓ Initial scrape completed")
+    except Exception as e:
+        print(f"⚠️ Initial scrape failed: {e}")
+    
+    # Start background task for daily updates
+    asyncio.create_task(auto_scrape_papers())
+    print("✓ Background scraper started (runs every 24 hours)")
 
 # Pydantic models for API
 class PaperResponse(BaseModel):
@@ -68,6 +111,21 @@ class CommentResponse(BaseModel):
 def root():
     return {"message": "arXiv News API"}
 
+@app.get("/status")
+def get_status(db: Session = Depends(get_db)):
+    """Get API and scraper status"""
+    global last_scrape_time
+    
+    paper_count = db.query(Paper).count()
+    
+    return {
+        "status": "running",
+        "total_papers": paper_count,
+        "last_scrape": last_scrape_time.isoformat() if last_scrape_time else None,
+        "next_scrape": (last_scrape_time + timedelta(hours=24)).isoformat() if last_scrape_time else None,
+        "auto_scraper_enabled": True
+    }
+
 @app.get("/papers", response_model=List[PaperResponse])
 def get_papers(
     skip: int = 0,
@@ -81,7 +139,8 @@ def get_papers(
     if sort == "votes":
         query = query.order_by(Paper.vote_count.desc())
     elif sort == "recent":
-        query = query.order_by(Paper.created_at.desc())
+        # Sort by published date (from arXiv), not created_at (when added to DB)
+        query = query.order_by(Paper.published.desc())
     elif sort == "comments":
         query = query.order_by(Paper.comment_count.desc())
     
