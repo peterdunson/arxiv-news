@@ -53,11 +53,11 @@ export default function PaperCard({ paper, userId }) {
 
   return (
     <section
-      className="bg-white border border-gray-200 rounded-xl p-8 mb-6 shadow-md hover:shadow-2xl transition-all hover:-translate-y-2 cursor-pointer relative overflow-hidden"
+      className="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer relative overflow-hidden"
       onClick={() => navigate(`/paper/${paper.arxiv_id}`)}
       style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%)',
-        backdropFilter: 'blur(10px)',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+        backdropFilter: 'blur(5px)',
         border: '1px solid rgba(226,232,240,0.8)'
       }}
     >
@@ -70,7 +70,7 @@ export default function PaperCard({ paper, userId }) {
         }}
       ></div>
 
-      <div className="flex gap-6 relative z-10">
+      <div className="flex gap-8 relative z-10">
         {/* Vote button */}
         <div className="flex flex-col items-center gap-1 flex-shrink-0">
           <button
@@ -90,11 +90,11 @@ export default function PaperCard({ paper, userId }) {
 
         {/* Paper content */}
         <div className="flex-1">
-          <h2 className="text-xl font-bold text-gray-900 mb-3 leading-snug hover:text-purple-700 transition-colors">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 leading-snug hover:text-purple-700 transition-colors">
             {paper.title}
           </h2>
 
-          <div className="meta flex flex-wrap gap-4 mb-4 text-sm">
+          <div className="meta flex flex-wrap gap-4 mb-6 text-sm">
             <span className="authors text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">
               👥 {formatAuthors(paper.authors)}
             </span>
@@ -106,7 +106,7 @@ export default function PaperCard({ paper, userId }) {
             </span>
           </div>
 
-          <div className="categories mb-4 flex flex-wrap gap-2">
+          <div className="categories mb-6 flex flex-wrap gap-2">
             {paper.categories.slice(0, 3).map((cat, index) => {
               const colors = [
                 'from-pink-500 to-rose-500',
@@ -129,7 +129,7 @@ export default function PaperCard({ paper, userId }) {
           </div>
 
           <div
-            className="abstract p-5 rounded-xl mb-4 border-l-4 relative overflow-hidden"
+            className="abstract p-5 pl-20 rounded-xl mb-4 border-l-4 relative overflow-hidden"
             style={{
               background: 'linear-gradient(135deg, rgba(248,250,252,0.8) 0%, rgba(241,245,249,0.8) 100%)',
               borderLeftColor: '#667eea',
@@ -149,7 +149,7 @@ export default function PaperCard({ paper, userId }) {
           {/* Optional extras */}
           {(paper.comment || paper.journal_ref || paper.doi) && (
             <div
-              className="extras text-sm text-gray-600 mb-4 p-4 rounded-xl relative overflow-hidden"
+              className="extras text-sm text-gray-600 mb-6 p-4 rounded-xl relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(241,245,249,0.8) 0%, rgba(226,232,240,0.8) 100%)',
                 backdropFilter: 'blur(5px)'
@@ -181,7 +181,7 @@ export default function PaperCard({ paper, userId }) {
             </div>
           )}
 
-          <div className="links flex gap-4">
+          <div className="links flex gap-4 mt-2">
             <a
               href={paper.arxiv_url}
               target="_blank"

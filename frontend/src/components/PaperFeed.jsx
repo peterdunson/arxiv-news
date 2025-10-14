@@ -62,7 +62,7 @@ export default function PaperFeed() {
     <div style={{background: '#f8f9fa', minHeight: '100vh'}}>
       <div className="max-width-container">
         {/* Header */}
-        <header className="mb-6">
+        <header className="mb-12">
           <h1 className="gradient-text">🔬 arXiv News</h1>
           <p className="text-gray-600">Latest research papers from arXiv</p>
         </header>

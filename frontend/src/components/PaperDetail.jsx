@@ -259,13 +259,13 @@ export default function PaperDetail() {
         </div>
 
         {/* Comments section */}
-        <div className="border border-gray-200 rounded-xl p-8 shadow-md">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <div className="border-2 border-gray-300 rounded-xl p-10 shadow-lg bg-white">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">
             💬 Comments ({comments.length})
           </h2>
 
           {/* Add comment form */}
-          <form onSubmit={handleAddComment} className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
+          <form onSubmit={handleAddComment} className="mb-10 bg-gray-50 p-8 rounded-lg border-2 border-gray-200">
             <div className="mb-4">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Your Name</label>
               <input
@@ -302,17 +302,17 @@ export default function PaperDetail() {
 
           {/* Comments list */}
           {comments.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-400">
               <div className="text-4xl mb-3">💭</div>
               <p className="text-lg font-semibold text-gray-700 mb-2">No comments yet</p>
               <p className="text-sm text-gray-500">Be the first to share your thoughts!</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {comments.map((comment) => (
                 <div
                   key={comment.id}
-                  className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-all"
+                  className="border-2 border-gray-200 rounded-lg p-6 hover:shadow-md transition-all bg-white"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
