@@ -63,7 +63,7 @@ async def startup():
     print("🚀 Running initial paper scrape...")
     try:
         from scraper import scrape_latest_papers
-        scrape_latest_papers(max_results=100)
+        scrape_latest_papers(max_results=300)
         global last_scrape_time
         last_scrape_time = datetime.now()
         print("✓ Initial scrape completed")

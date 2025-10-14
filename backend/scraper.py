@@ -14,9 +14,10 @@ def scrape_latest_papers(max_results=50):
     try:
         print("🔎 Fetching latest papers from arXiv...")
         
-        # Use your existing renderarxiv to search - expanded categories
+        # Search all papers - broad query to get papers from all categories
+        # arXiv API will return results across all categories when we use a broad term
         papers = search_arxiv(
-            query="cat:cs.AI OR cat:cs.LG OR cat:cs.CL OR cat:cs.CV OR cat:cs.RO OR cat:stat.ML OR cat:math.* OR cat:physics.* OR cat:quant-ph",
+            query="all",
             max_results=max_results,
             sort_by="submittedDate",
             sort_order="descending"
@@ -54,4 +55,4 @@ def scrape_latest_papers(max_results=50):
         db.close()
 
 if __name__ == "__main__":
-    scrape_latest_papers()
+    scrape_latest_papers(max_results=300)

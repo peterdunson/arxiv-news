@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getPapers } from '../api';
 import PaperCard from './PaperCard';
+import { CATEGORY_MAP, ALL_CATEGORIES } from '../utils/categories';
 
 const POSTS_PER_PAGE = 30;
 
@@ -28,7 +29,7 @@ export default function PaperFeed() {
     try {
       // Map sort parameter to API sort parameter
       const apiSort = sortBy === 'hot' ? 'votes' : sortBy === 'discussed' ? 'comments' : 'recent';
-      const data = await getPapers(apiSort, 100);
+      const data = await getPapers(apiSort, 500); // Fetch more papers to show all available
       setPapers(data);
     } catch (error) {
       console.error('Failed to load papers:', error);
@@ -105,19 +106,21 @@ export default function PaperFeed() {
   };
 
   const getCategoryName = (cat) => {
-    const names = {
-      'all': 'All Papers',
-      'cs.AI': 'Artificial Intelligence',
-      'cs.LG': 'Machine Learning',
-      'cs.CL': 'Natural Language Processing',
-      'cs.CV': 'Computer Vision',
-      'cs.RO': 'Robotics',
-      'stat.ML': 'Statistics',
-      'math': 'Mathematics',
-      'physics': 'Physics',
-      'quant-ph': 'Quantum Physics'
-    };
-    return names[cat] || cat;
+    // Handle special cases
+    if (cat === 'all') return 'All Papers';
+    if (cat === 'math') return 'Mathematics';
+    if (cat === 'physics') return 'Physics';
+    
+    // Look up in category map
+    if (CATEGORY_MAP[cat]) return CATEGORY_MAP[cat];
+    
+    // Try to find in ALL_CATEGORIES
+    for (const [subject, categories] of Object.entries(ALL_CATEGORIES)) {
+      const found = categories.find(c => c.id === cat);
+      if (found) return found.name;
+    }
+    
+    return cat;
   };
 
   const getSortName = (sort) => {

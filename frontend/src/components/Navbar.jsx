@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { ALL_CATEGORIES } from '../utils/categories';
 
 export default function Navbar() {
   const [searchParams] = useSearchParams();
@@ -9,11 +10,24 @@ export default function Navbar() {
   const currentSearch = searchParams.get('q') || '';
   
   const [searchInput, setSearchInput] = useState(currentSearch);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Update search input when URL changes
   useEffect(() => {
     setSearchInput(currentSearch);
   }, [currentSearch]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -31,6 +45,13 @@ export default function Navbar() {
     params.delete('q');
     setSearchInput('');
     navigate(`/?${params.toString()}`);
+  };
+
+  const handleCategoryClick = (categoryId) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('cat', categoryId);
+    navigate(`/?${params.toString()}`);
+    setShowDropdown(false);
   };
 
   return (
@@ -72,7 +93,82 @@ export default function Navbar() {
                   <Link to={`/?sort=${currentSort}&cat=stat.ML`} style={{ color: '#ffffff' }}>stats</Link> |{' '}
                   <Link to={`/?sort=${currentSort}&cat=math`} style={{ color: '#ffffff' }}>math</Link> |{' '}
                   <Link to={`/?sort=${currentSort}&cat=physics`} style={{ color: '#ffffff' }}>physics</Link> |{' '}
-                  <Link to={`/?sort=${currentSort}&cat=quant-ph`} style={{ color: '#ffffff' }}>quantum</Link>
+                  <Link to={`/?sort=${currentSort}&cat=quant-ph`} style={{ color: '#ffffff' }}>quantum</Link> |{' '}
+                  <span 
+                    ref={dropdownRef}
+                    style={{ position: 'relative', display: 'inline-block' }}
+                  >
+                    <a 
+                      onClick={() => setShowDropdown(!showDropdown)}
+                      style={{ color: '#ffffff', cursor: 'pointer', userSelect: 'none' }}
+                    >
+                      more ▾
+                    </a>
+                    {showDropdown && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: '0',
+                          marginTop: '4px',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #d64545',
+                          borderRadius: '4px',
+                          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                          zIndex: 1000,
+                          minWidth: '250px',
+                          maxHeight: '500px',
+                          overflowY: 'auto',
+                          padding: '8px 0',
+                        }}
+                      >
+                        {Object.entries(ALL_CATEGORIES).map(([subject, categories]) => (
+                          <div key={subject} style={{ marginBottom: '8px' }}>
+                            <div
+                              style={{
+                                padding: '4px 12px',
+                                fontSize: '9pt',
+                                fontWeight: 'bold',
+                                color: '#d64545',
+                                borderBottom: '1px solid #f0f0f0',
+                                fontFamily: 'Verdana',
+                              }}
+                            >
+                              {subject}
+                            </div>
+                            {categories.map((cat) => (
+                              <a
+                                key={cat.id}
+                                onClick={() => handleCategoryClick(cat.id)}
+                                style={{
+                                  display: 'block',
+                                  padding: '4px 12px 4px 20px',
+                                  fontSize: '9pt',
+                                  color: currentCat === cat.id ? '#d64545' : '#000000',
+                                  cursor: 'pointer',
+                                  fontFamily: 'Verdana',
+                                  backgroundColor: currentCat === cat.id ? '#f8f8f8' : 'transparent',
+                                  textDecoration: 'none',
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (currentCat !== cat.id) {
+                                    e.target.style.backgroundColor = '#f8f8f8';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (currentCat !== cat.id) {
+                                    e.target.style.backgroundColor = 'transparent';
+                                  }
+                                }}
+                              >
+                                {cat.name}
+                              </a>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </span>
                 </span>
               </td>
               <td style={{ textAlign: 'right', padding: '0px', paddingRight: '4px' }}>
