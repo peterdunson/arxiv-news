@@ -9,6 +9,7 @@ export default function PaperFeed() {
   const [searchParams] = useSearchParams();
   const category = searchParams.get('cat') || 'all';
   const sortBy = searchParams.get('sort') || 'hot';
+  const searchQuery = searchParams.get('q') || '';
   const [papers, setPapers] = useState([]);
   const [filteredPapers, setFilteredPapers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +21,7 @@ export default function PaperFeed() {
 
   useEffect(() => {
     filterAndSortPapers();
-  }, [papers, category, sortBy]);
+  }, [papers, category, sortBy, searchQuery]);
 
   const loadPapers = async () => {
     setLoading(true);
@@ -38,9 +39,40 @@ export default function PaperFeed() {
   const filterAndSortPapers = () => {
     let filtered = papers;
     
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(p => {
+        try {
+          // Title match
+          const titleMatch = p.title && p.title.toLowerCase().includes(query);
+          
+          // Abstract match
+          const abstractMatch = p.abstract && p.abstract.toLowerCase().includes(query);
+          
+          // Author match - handle both string and array
+          let authorMatch = false;
+          if (p.authors) {
+            if (typeof p.authors === 'string') {
+              authorMatch = p.authors.toLowerCase().includes(query);
+            } else if (Array.isArray(p.authors)) {
+              authorMatch = p.authors.some(author => 
+                author.toLowerCase().includes(query)
+              );
+            }
+          }
+          
+          return titleMatch || abstractMatch || authorMatch;
+        } catch (error) {
+          console.error('Error filtering paper:', error, p);
+          return false;
+        }
+      });
+    }
+    
     // Filter by category
     if (category !== 'all') {
-      filtered = papers.filter(p => 
+      filtered = filtered.filter(p => 
         p.categories.some(cat => cat.startsWith(category))
       );
     }
@@ -142,6 +174,12 @@ export default function PaperFeed() {
                     <>
                       {' in '}
                       <b style={{ color: '#000000' }}>{getCategoryName(category)}</b>
+                    </>
+                  )}
+                  {searchQuery && (
+                    <>
+                      {' matching '}
+                      <b style={{ color: '#000000' }}>"{searchQuery}"</b>
                     </>
                   )}
                   {' '}

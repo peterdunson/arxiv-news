@@ -51,8 +51,22 @@ export default function PaperCard({ paper, rank }) {
   };
 
   const formatAuthors = (authors) => {
-    if (authors.length === 0) return 'unknown';
-    return authors[0].split(' ').pop(); // Get last name of first author
+    // Handle if authors is a string (JSON) or already an array
+    let authorList = authors;
+    if (typeof authors === 'string') {
+      try {
+        authorList = JSON.parse(authors);
+      } catch {
+        return authors; // Return as-is if can't parse
+      }
+    }
+    
+    if (!Array.isArray(authorList) || authorList.length === 0) {
+      return 'unknown';
+    }
+    
+    // Show all authors, comma-separated
+    return authorList.join(', ');
   };
 
   return (

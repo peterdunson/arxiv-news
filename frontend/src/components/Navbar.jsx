@@ -1,9 +1,37 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const currentSort = searchParams.get('sort') || 'hot';
   const currentCat = searchParams.get('cat') || 'all';
+  const currentSearch = searchParams.get('q') || '';
+  
+  const [searchInput, setSearchInput] = useState(currentSearch);
+
+  // Update search input when URL changes
+  useEffect(() => {
+    setSearchInput(currentSearch);
+  }, [currentSearch]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams(searchParams);
+    if (searchInput.trim()) {
+      params.set('q', searchInput.trim());
+    } else {
+      params.delete('q');
+    }
+    navigate(`/?${params.toString()}`);
+  };
+
+  const clearSearch = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('q');
+    setSearchInput('');
+    navigate(`/?${params.toString()}`);
+  };
 
   return (
     <tr>
@@ -49,6 +77,41 @@ export default function Navbar() {
               </td>
               <td style={{ textAlign: 'right', padding: '0px', paddingRight: '4px' }}>
                 <span className="pagetop">
+                  <form onSubmit={handleSearch} style={{ display: 'inline', marginRight: '10px' }}>
+                    <input
+                      type="text"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      placeholder="search"
+                      style={{
+                        width: '120px',
+                        padding: '2px 4px',
+                        fontSize: '10pt',
+                        fontFamily: 'Verdana',
+                        border: '1px solid white',
+                        backgroundColor: 'white',
+                        color: '#000000'
+                      }}
+                    />
+                    {currentSearch && (
+                      <button
+                        type="button"
+                        onClick={clearSearch}
+                        style={{
+                          marginLeft: '4px',
+                          padding: '2px 6px',
+                          fontSize: '9pt',
+                          fontFamily: 'Verdana',
+                          border: '1px solid white',
+                          backgroundColor: 'white',
+                          color: '#d64545',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        clear
+                      </button>
+                    )}
+                  </form>
                   <Link to="/login" style={{ color: '#ffffff' }}>login</Link>
                 </span>
               </td>
