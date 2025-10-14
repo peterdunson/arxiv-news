@@ -56,7 +56,7 @@ export default function Navbar() {
 
   return (
     <tr>
-      <td style={{ backgroundColor: '#d64545', padding: '0px' }}>
+      <td style={{ backgroundColor: '#b31b1b', padding: '0px' }}>
         <table style={{ border: '0px', padding: '2px', borderSpacing: '0px', width: '100%' }}>
           <tbody>
             <tr>
@@ -112,7 +112,7 @@ export default function Navbar() {
                           right: '0',
                           marginTop: '4px',
                           backgroundColor: '#ffffff',
-                          border: '1px solid #d64545',
+                          border: '1px solid #b31b1b',
                           borderRadius: '4px',
                           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                           zIndex: 1000,
@@ -129,7 +129,7 @@ export default function Navbar() {
                                 padding: '4px 12px',
                                 fontSize: '9pt',
                                 fontWeight: 'bold',
-                                color: '#d64545',
+                                color: '#b31b1b',
                                 borderBottom: '1px solid #f0f0f0',
                                 fontFamily: 'Verdana',
                               }}
@@ -144,7 +144,7 @@ export default function Navbar() {
                                   display: 'block',
                                   padding: '4px 12px 4px 20px',
                                   fontSize: '9pt',
-                                  color: currentCat === cat.id ? '#d64545' : '#000000',
+                                  color: currentCat === cat.id ? '#b31b1b' : '#000000',
                                   cursor: 'pointer',
                                   fontFamily: 'Verdana',
                                   backgroundColor: currentCat === cat.id ? '#f8f8f8' : 'transparent',
@@ -200,7 +200,7 @@ export default function Navbar() {
                           fontFamily: 'Verdana',
                           border: '1px solid white',
                           backgroundColor: 'white',
-                          color: '#d64545',
+                          color: '#b31b1b',
                           cursor: 'pointer'
                         }}
                       >
