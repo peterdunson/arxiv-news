@@ -58,7 +58,7 @@ async def delayed_auto_scraper():
             
             loop = asyncio.get_event_loop()
             with concurrent.futures.ThreadPoolExecutor() as pool:
-                await loop.run_in_executor(pool, scrape_latest_papers, 100)
+                await loop.run_in_executor(pool, scrape_latest_papers, 500)
             
             last_scrape_time = datetime.now()
             print(f"✓ Scraper completed successfully. Next run in 24 hours.")
@@ -68,7 +68,7 @@ async def delayed_auto_scraper():
         
         # Wait 24 hours before next run
         await asyncio.sleep(24 * 60 * 60)
-        
+
 # Pydantic models for API
 class PaperResponse(BaseModel):
     id: int
@@ -122,7 +122,7 @@ def get_status(db: Session = Depends(get_db)):
     }
 
 @app.post("/admin/scrape")
-def manual_scrape(max_results: int = 100, db: Session = Depends(get_db)):
+def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
     """Manually trigger a scrape (admin endpoint)"""
     try:
         from scraper import scrape_latest_papers

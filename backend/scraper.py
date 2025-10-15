@@ -57,4 +57,4 @@ def scrape_latest_papers(max_results=50):
         db.close()
 
 if __name__ == "__main__":
-    scrape_latest_papers(max_results=300)
+    scrape_latest_papers(max_results=500)
