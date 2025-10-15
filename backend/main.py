@@ -19,7 +19,7 @@ last_scrape_time = None
 # CORS origins from environment variable or default to localhost
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",
-    "http://localhost:5173,http://localhost:3000,http://localhost:5174,https://arxiv-news.vercel.app,https://your-custom-domain.com"
+    "http://localhost:5173,http://localhost:3000"
 ).split(",")
 
 # CORS for frontend
@@ -35,6 +35,10 @@ app.add_middleware(
 async def auto_scrape_papers():
     """Background task that scrapes arXiv papers once per day"""
     global last_scrape_time
+    
+    # Wait 30 seconds after startup before first scrape
+    print("⏳ Waiting 30 seconds before initial scrape...")
+    await asyncio.sleep(30)
     
     while True:
         try:
@@ -59,20 +63,9 @@ async def auto_scrape_papers():
 async def startup():
     init_db()
     
-    # Run scraper immediately on startup
-    print("🚀 Running initial paper scrape...")
-    try:
-        from scraper import scrape_latest_papers
-        scrape_latest_papers(max_results=300)
-        global last_scrape_time
-        last_scrape_time = datetime.now()
-        print("✓ Initial scrape completed")
-    except Exception as e:
-        print(f"⚠️ Initial scrape failed: {e}")
-    
-    # Start background task for daily updates
+    # Start background task for daily updates (will scrape after startup)
     asyncio.create_task(auto_scrape_papers())
-    print("✓ Background scraper started (runs every 24 hours)")
+    print("✓ Database initialized and background scraper started")
 
 # Pydantic models for API
 class PaperResponse(BaseModel):
@@ -125,6 +118,25 @@ def get_status(db: Session = Depends(get_db)):
         "next_scrape": (last_scrape_time + timedelta(hours=24)).isoformat() if last_scrape_time else None,
         "auto_scraper_enabled": True
     }
+
+@app.post("/admin/scrape")
+def manual_scrape(max_results: int = 100, db: Session = Depends(get_db)):
+    """Manually trigger a scrape (admin endpoint)"""
+    try:
+        from scraper import scrape_latest_papers
+        scrape_latest_papers(max_results=max_results)
+        
+        global last_scrape_time
+        last_scrape_time = datetime.now()
+        
+        paper_count = db.query(Paper).count()
+        return {
+            "status": "success",
+            "message": f"Scrape completed",
+            "total_papers": paper_count
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scrape failed: {str(e)}")
 
 @app.get("/papers", response_model=List[PaperResponse])
 def get_papers(
