@@ -14,10 +14,11 @@ A Hacker News-style platform for discovering and discussing research papers from
 - **Category Filtering** - Browse by AI, ML, Physics, Math, and more
 - **Search** - Find papers by title, abstract, or author
 
-## Coming Soon
+## Updates Coming Soon
 
 - 👤 **User Accounts** - Save your profile and activity
 - 👥 **Communities** - Create topic-based discussion groups
+- **Any ideas?**
 
 ## Tech Stack
 
