@@ -31,21 +31,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Auto-scraper background task
-async def auto_scrape_papers():
-    """Background task that scrapes arXiv papers once per day"""
+# Initialize database on startup
+@app.on_event("startup")
+async def startup():
+    init_db()
+    print("✓ Database initialized")
+    
+    # Start background scraper AFTER app is healthy
+    asyncio.create_task(delayed_auto_scraper())
+
+async def delayed_auto_scraper():
+    """Wait for app to start, then run daily scraper"""
     global last_scrape_time
     
-    # Wait 60 seconds after startup before first scrape (let health checks pass)
-    print("⏳ Waiting 60 seconds before initial scrape...")
-    await asyncio.sleep(60)
+    # Wait 30 seconds for app to be healthy first
+    print("⏳ Waiting 30 seconds before starting scraper...")
+    await asyncio.sleep(30)
     
     while True:
         try:
-            # Run scraper in thread pool to avoid blocking
             print(f"🔄 [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Running automatic paper scraper...")
             
-            # Import and run scraper in executor (non-blocking)
+            # Run scraper in thread pool (non-blocking)
             from scraper import scrape_latest_papers
             import concurrent.futures
             
@@ -60,17 +67,8 @@ async def auto_scrape_papers():
             print(f"❌ Error in auto-scraper: {e}")
         
         # Wait 24 hours before next run
-        await asyncio.sleep(24 * 60 * 60)  # 24 hours in seconds
-
-# Initialize database on startup
-@app.on_event("startup")
-async def startup():
-    init_db()
-    
-    # Start background task for daily updates (will scrape after startup)
-    asyncio.create_task(auto_scrape_papers())
-    print("✓ Database initialized and background scraper started")
-
+        await asyncio.sleep(24 * 60 * 60)
+        
 # Pydantic models for API
 class PaperResponse(BaseModel):
     id: int
