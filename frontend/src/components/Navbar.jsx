@@ -208,7 +208,7 @@ export default function Navbar() {
                       </button>
                     )}
                   </form>
-                  <Link to="/login" style={{ color: '#ffffff' }}>login</Link>
+                  <Link to="#" onClick={(e) => { e.preventDefault(); alert('coming soon...'); }} style={{ color: '#ffffff' }}>login</Link>
                 </span>
               </td>
             </tr>
