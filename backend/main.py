@@ -36,18 +36,22 @@ async def auto_scrape_papers():
     """Background task that scrapes arXiv papers once per day"""
     global last_scrape_time
     
-    # Wait 30 seconds after startup before first scrape
-    print("⏳ Waiting 30 seconds before initial scrape...")
-    await asyncio.sleep(30)
+    # Wait 60 seconds after startup before first scrape (let health checks pass)
+    print("⏳ Waiting 60 seconds before initial scrape...")
+    await asyncio.sleep(60)
     
     while True:
         try:
-            # Run scraper
+            # Run scraper in thread pool to avoid blocking
             print(f"🔄 [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Running automatic paper scraper...")
             
-            # Import and run scraper
+            # Import and run scraper in executor (non-blocking)
             from scraper import scrape_latest_papers
-            scrape_latest_papers(max_results=100)  # Fetch more papers for daily updates
+            import concurrent.futures
+            
+            loop = asyncio.get_event_loop()
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                await loop.run_in_executor(pool, scrape_latest_papers, 100)
             
             last_scrape_time = datetime.now()
             print(f"✓ Scraper completed successfully. Next run in 24 hours.")
