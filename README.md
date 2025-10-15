@@ -1,5 +1,7 @@
 # 📰 arXiv News
 
+![arXiv News Screenshot](arxiv-news.png)
+
 A Hacker News-style platform for discovering and discussing research papers from arXiv.
 
 **🌐 Live:** [arxiv-news.com](https://arxiv-news.com)
