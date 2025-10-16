@@ -121,7 +121,7 @@ def get_status(db: Session = Depends(get_db)):
         "auto_scraper_enabled": True
     }
 
-@app.post("/admin/scrape")
+@app.get("/admin/scrape")
 def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
     """Manually trigger a scrape (admin endpoint)"""
     try:
