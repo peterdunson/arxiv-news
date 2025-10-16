@@ -29,7 +29,7 @@ export default function PaperFeed() {
     try {
       // Map sort parameter to API sort parameter
       const apiSort = sortBy === 'hot' ? 'votes' : sortBy === 'discussed' ? 'comments' : 'recent';
-      const data = await getPapers(apiSort, 500); // Fetch more papers to show all available
+      const data = await getPapers(apiSort, 1000); // Fetch more papers to show all available
       setPapers(data);
     } catch (error) {
       console.error('Failed to load papers:', error);
