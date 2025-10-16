@@ -1,5 +1,6 @@
 import sys
 import os
+
 # Add backend directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -61,9 +62,18 @@ def scrape_latest_papers(max_results=500):
             )
             db.add(new_paper)
             added += 1
+            
+            # Commit every 10 papers to avoid duplicate key errors
+            if added % 10 == 0:
+                db.commit()
         
+        # Final commit for remaining papers
         db.commit()
         print(f"✓ Added {added} papers")
+        
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        db.rollback()
         
     finally:
         db.close()
