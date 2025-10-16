@@ -1,6 +1,5 @@
 import sys
 import os
-
 # Add backend directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -9,28 +8,37 @@ from database import SessionLocal, init_db
 from models import Paper as DBPaper
 import json
 
-def scrape_latest_papers(max_results=50):
+def scrape_latest_papers(max_results=500):
     """Fetch latest papers from arXiv and add to database"""
-
+    
+    # Initialize database tables if they don't exist
     init_db()
-
-
+    
     db = SessionLocal()
     
     try:
         print("🔎 Fetching latest papers from arXiv...")
         
-        # Search all papers - broad query to get papers from all categories
-        # arXiv API will return results across all categories when we use a broad term
-        papers = search_arxiv(
-            query="all",
-            max_results=max_results,
-            sort_by="submittedDate",
-            sort_order="descending"
-        )
+        # Fetch papers in batches (arXiv API returns max 100 per request)
+        all_papers = []
+        batch_size = 100
+        batches = (max_results + batch_size - 1) // batch_size  # Round up
+        
+        for i in range(batches):
+            batch = search_arxiv(
+                query="all",
+                max_results=batch_size,
+                sort_by="submittedDate",
+                sort_order="descending"
+            )
+            all_papers.extend(batch)
+            if len(batch) < batch_size:
+                break  # No more papers available
+        
+        print(f"✓ Retrieved {len(all_papers)} papers")
         
         added = 0
-        for paper in papers:
+        for paper in all_papers[:max_results]:  # Limit to max_results
             # Check if exists
             if db.query(DBPaper).filter(DBPaper.arxiv_id == paper.arxiv_id).first():
                 continue
@@ -56,7 +64,7 @@ def scrape_latest_papers(max_results=50):
         
         db.commit()
         print(f"✓ Added {added} papers")
-
+        
     finally:
         db.close()
 
