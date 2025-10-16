@@ -5,12 +5,16 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from renderarxiv.arxiv_client import search_arxiv
-from database import SessionLocal
+from database import SessionLocal, init_db
 from models import Paper as DBPaper
 import json
 
 def scrape_latest_papers(max_results=50):
     """Fetch latest papers from arXiv and add to database"""
+
+    init_db()
+
+
     db = SessionLocal()
     
     try:
@@ -52,7 +56,7 @@ def scrape_latest_papers(max_results=50):
         
         db.commit()
         print(f"✓ Added {added} papers")
-        
+
     finally:
         db.close()
 
