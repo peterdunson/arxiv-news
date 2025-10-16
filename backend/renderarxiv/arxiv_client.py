@@ -25,6 +25,7 @@ def search_arxiv(
     sort_by: str = "relevance",
     sort_order: str = "descending",
     category: Optional[str] = None,
+    start: int = 0,  # NEW: Add pagination support
 ) -> List[Paper]:
     """
     Search arXiv using the official API.
@@ -35,6 +36,7 @@ def search_arxiv(
         sort_by: Sort criterion (relevance, lastUpdatedDate, submittedDate)
         sort_order: Sort order (ascending, descending)
         category: Filter by category (e.g., 'cs.LG', 'cs.AI')
+        start: Starting index for pagination (NEW)
     
     Returns:
         List of Paper objects
@@ -46,13 +48,13 @@ def search_arxiv(
     
     params = {
         "search_query": search_query,
-        "start": 0,
+        "start": start,  # CHANGED: Now uses the parameter instead of hardcoded 0
         "max_results": max_results,
         "sortBy": sort_by,
         "sortOrder": sort_order,
     }
     
-    print(f"🔎 Searching arXiv for: '{query}'")
+    print(f"🔎 Searching arXiv for: '{query}' (start={start})")  # CHANGED: Show offset
     if category:
         print(f"   Filtering by category: {category}")
     
@@ -125,7 +127,6 @@ def search_arxiv(
     except Exception as e:
         print(f"❌ Error parsing results: {e}")
         return []
-
 
 def fetch_citations_batch(papers: List[Paper], batch_size: int = 100) -> List[Paper]:
     """

@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 # Add backend directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -26,21 +27,50 @@ def scrape_latest_papers(max_results=1000):
         
         print("🔎 Fetching latest papers from arXiv...")
         
-        # Fetch recent papers from arXiv
-        papers = search_arxiv(
-            query="all",
-            max_results=max_results,
-            sort_by="submittedDate",
-            sort_order="descending"
-        )
+        # Fetch papers in batches with pagination
+        all_papers = []
+        batch_size = 100  # arXiv API limit per request
+        num_batches = (max_results + batch_size - 1) // batch_size
         
-        print(f"✓ Retrieved {len(papers)} papers from arXiv")
+        for batch_num in range(num_batches):
+            print(f"   Batch {batch_num + 1}/{num_batches}...")
+            
+            # Fetch batch with offset
+            papers = search_arxiv(
+                query="all",
+                max_results=batch_size,
+                sort_by="submittedDate",
+                sort_order="descending",
+                start=batch_num * batch_size  # NEW: Pagination offset
+            )
+            
+            if not papers:
+                print(f"   No more papers available")
+                break
+            
+            all_papers.extend(papers)
+            
+            # Be nice to arXiv API - wait between requests
+            if batch_num < num_batches - 1:
+                time.sleep(3)
+        
+        print(f"✓ Retrieved {len(all_papers)} papers from arXiv")
+        
+        # Remove duplicates within fetched papers
+        seen_ids = set()
+        unique_papers = []
+        for paper in all_papers:
+            if paper.arxiv_id not in seen_ids:
+                seen_ids.add(paper.arxiv_id)
+                unique_papers.append(paper)
+        
+        print(f"✓ {len(unique_papers)} unique papers after deduplication")
         
         added = 0
         skipped = 0
         
-        for paper in papers:
-            # Check if paper already exists
+        for paper in unique_papers:
+            # Check if paper already exists in database
             existing = db.query(DBPaper).filter(DBPaper.arxiv_id == paper.arxiv_id).first()
             
             if existing:
