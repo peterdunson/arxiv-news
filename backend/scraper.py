@@ -9,42 +9,45 @@ from database import SessionLocal, init_db
 from models import Paper as DBPaper
 import json
 
-def scrape_latest_papers(max_results=500):
+def scrape_latest_papers(max_results=1000):
     """Fetch latest papers from arXiv and add to database"""
     
-    # Initialize database tables if they don't exist
     init_db()
-    
     db = SessionLocal()
     
     try:
+        # Get the most recent paper we have in database
+        latest_paper = db.query(DBPaper).order_by(DBPaper.published.desc()).first()
+        
+        if latest_paper:
+            print(f"📅 Latest paper in DB: {latest_paper.title[:50]}... ({latest_paper.published})")
+        else:
+            print("📅 No papers in database yet")
+        
         print("🔎 Fetching latest papers from arXiv...")
         
-        # Fetch papers in batches (arXiv API returns max 100 per request)
-        all_papers = []
-        batch_size = 100
-        batches = (max_results + batch_size - 1) // batch_size  # Round up
+        # Fetch recent papers from arXiv
+        papers = search_arxiv(
+            query="all",
+            max_results=max_results,
+            sort_by="submittedDate",
+            sort_order="descending"
+        )
         
-        for i in range(batches):
-            batch = search_arxiv(
-                query="all",
-                max_results=batch_size,
-                sort_by="submittedDate",
-                sort_order="descending"
-            )
-            all_papers.extend(batch)
-            if len(batch) < batch_size:
-                break  # No more papers available
-        
-        print(f"✓ Retrieved {len(all_papers)} papers")
+        print(f"✓ Retrieved {len(papers)} papers from arXiv")
         
         added = 0
-        for paper in all_papers[:max_results]:  # Limit to max_results
-            # Check if exists
-            if db.query(DBPaper).filter(DBPaper.arxiv_id == paper.arxiv_id).first():
-                continue
+        skipped = 0
+        
+        for paper in papers:
+            # Check if paper already exists
+            existing = db.query(DBPaper).filter(DBPaper.arxiv_id == paper.arxiv_id).first()
             
-            # Add to database
+            if existing:
+                skipped += 1
+                continue  # Skip duplicates
+            
+            # Add new paper to database
             new_paper = DBPaper(
                 arxiv_id=paper.arxiv_id,
                 title=paper.title,
@@ -63,13 +66,13 @@ def scrape_latest_papers(max_results=500):
             db.add(new_paper)
             added += 1
             
-            # Commit every 10 papers to avoid duplicate key errors
+            # Commit every 10 papers for safety
             if added % 10 == 0:
                 db.commit()
         
-        # Final commit for remaining papers
+        # Final commit
         db.commit()
-        print(f"✓ Added {added} papers")
+        print(f"✓ Added {added} new papers (skipped {skipped} duplicates)")
         
     except Exception as e:
         print(f"❌ Error: {e}")
@@ -79,4 +82,4 @@ def scrape_latest_papers(max_results=500):
         db.close()
 
 if __name__ == "__main__":
-    scrape_latest_papers(max_results=500)
+    scrape_latest_papers(max_results=1000)
