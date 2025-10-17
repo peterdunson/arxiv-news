@@ -143,7 +143,7 @@ def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
 @app.get("/papers", response_model=List[PaperResponse])
 def get_papers(
     skip: int = 0,
-    limit: int = 20,
+    limit: int = 5000,
     sort: str = "votes",  # votes, recent, comments
     db: Session = Depends(get_db)
 ):
