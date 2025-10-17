@@ -37,7 +37,7 @@ def scrape_latest_papers(max_results=1000):
             
             # Fetch batch with offset - EMPTY QUERY GETS ALL PAPERS
             papers = search_arxiv(
-                query="ti:* OR abs:*",  # Empty query = get ALL papers from ALL categories
+                query="cat:*",  # Empty query = get ALL papers from ALL categories
                 max_results=batch_size,
                 sort_by="submittedDate",
                 sort_order="descending",
