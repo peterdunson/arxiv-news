@@ -10,7 +10,7 @@ from database import SessionLocal, init_db
 from models import Paper as DBPaper
 import json
 
-def scrape_latest_papers(max_results=1000):
+def scrape_latest_papers(max_results=5000):
     """Fetch latest papers from arXiv and add to database"""
     
     init_db()
@@ -36,8 +36,12 @@ def scrape_latest_papers(max_results=1000):
             "cond-mat.*",# Condensed Matter
             "quant-ph",  # Quantum Physics
             "gr-qc",     # General Relativity
-            "hep-*",     # High Energy Physics (all)
-            "nucl-*",    # Nuclear (all)
+            "hep-ex",    # High Energy Physics - Experiment
+            "hep-lat",   # High Energy Physics - Lattice
+            "hep-ph",    # High Energy Physics - Phenomenology
+            "hep-th",    # High Energy Physics - Theory
+            "nucl-ex",   # Nuclear - Experiment
+            "nucl-th",   # Nuclear - Theory
             "nlin.*",    # Nonlinear Sciences
             "stat.*",    # Statistics
             "q-bio.*",   # Quantitative Biology
@@ -48,15 +52,14 @@ def scrape_latest_papers(max_results=1000):
         
         all_papers = []
         batch_size = 100
-        
+        batches_per_category = 5  # Get up to 500 papers per category
+
         # Search each category group
         for cat_num, category in enumerate(categories):
             print(f"\n📂 Category {cat_num + 1}/{len(categories)}: {category}")
             
-            # Fetch 2 batches per category (200 papers max per category)
-            for batch_num in range(2):
-                print(f"   Batch {batch_num + 1}/2...")
-                
+            # Fetch multiple batches per category
+            for batch_num in range(batches_per_category):
                 papers = search_arxiv(
                     query=f"cat:{category}",
                     max_results=batch_size,
@@ -66,13 +69,16 @@ def scrape_latest_papers(max_results=1000):
                 )
                 
                 if not papers:
-                    print(f"   No more papers in this category")
+                    print(f"   Batch {batch_num + 1}: No more papers (total: {batch_num * 100})")
                     break
                 
+                print(f"   Batch {batch_num + 1}: Retrieved {len(papers)} papers")
                 all_papers.extend(papers)
                 
                 # Small delay between requests
                 time.sleep(1)
+            
+            print(f"   ✓ Total from {category}: {len([p for p in all_papers if any(c.startswith(category.replace('*', '').replace('.*', '')) for c in p.categories)])} papers so far")
         
         print(f"\n✓ Retrieved {len(all_papers)} papers total from arXiv")
         
@@ -117,12 +123,13 @@ def scrape_latest_papers(max_results=1000):
             added += 1
             
             # Commit every 10 papers for safety
-            if added % 10 == 0:
+            if added % 50 == 0:
                 db.commit()
+                print(f"   💾 Committed {added} papers so far...")
         
         # Final commit
         db.commit()
-        print(f"✓ Added {added} new papers (skipped {skipped} duplicates)")
+        print(f"\n✓ Added {added} new papers (skipped {skipped} duplicates)")
         
     except Exception as e:
         print(f"❌ Error: {e}")
@@ -132,4 +139,4 @@ def scrape_latest_papers(max_results=1000):
         db.close()
 
 if __name__ == "__main__":
-    scrape_latest_papers(max_results=1000)
+    scrape_latest_papers(max_results=5000)
