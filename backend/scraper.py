@@ -35,13 +35,13 @@ def scrape_latest_papers(max_results=1000):
         for batch_num in range(num_batches):
             print(f"   Batch {batch_num + 1}/{num_batches}...")
             
-            # Fetch batch with offset
+            # Fetch batch with offset - EMPTY QUERY GETS ALL PAPERS
             papers = search_arxiv(
-                query="all",
+                query="",  # Empty query = get ALL papers from ALL categories
                 max_results=batch_size,
                 sort_by="submittedDate",
                 sort_order="descending",
-                start=batch_num * batch_size  # NEW: Pagination offset
+                start=batch_num * batch_size
             )
             
             if not papers:
