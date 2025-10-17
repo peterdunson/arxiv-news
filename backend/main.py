@@ -147,13 +147,21 @@ def get_papers(
     sort: str = "votes",  # votes, recent, comments
     db: Session = Depends(get_db)
 ):
-    """Get papers sorted by votes, recency, or comments"""
-    query = db.query(Paper)
+    """Get papers sorted by votes, recency, or comments (newest 5000 only)"""
+    
+    # Only get papers from the most recent 5000 by publication date
+    recent_papers_subquery = (
+        db.query(Paper.id)
+        .order_by(Paper.published.desc())
+        .limit(5000)
+        .subquery()
+    )
+    
+    query = db.query(Paper).filter(Paper.id.in_(recent_papers_subquery))
     
     if sort == "votes":
         query = query.order_by(Paper.vote_count.desc())
     elif sort == "recent":
-        # Sort by published date (from arXiv), not created_at (when added to DB)
         query = query.order_by(Paper.published.desc())
     elif sort == "comments":
         query = query.order_by(Paper.comment_count.desc())
