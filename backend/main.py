@@ -143,7 +143,7 @@ def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
 @app.get("/papers", response_model=List[PaperResponse])
 def get_papers(
     skip: int = 0,
-    limit: int = 5000,
+    limit: int = 15000,
     sort: str = "votes",  # votes, recent, comments
     db: Session = Depends(get_db)
 ):
@@ -153,7 +153,7 @@ def get_papers(
     recent_papers_subquery = (
         db.query(Paper.id)
         .order_by(Paper.published.desc())
-        .limit(5000)
+        .limit(15000)
         .subquery()
     )
     
