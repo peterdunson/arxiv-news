@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["python313"]
+
+[phases.install]
+cmds = [
+  "rm -rf .venv",
+  "cd backend && pip install --no-cache-dir -r requirements.txt"
+]
+
+[start]
+cmd = "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
