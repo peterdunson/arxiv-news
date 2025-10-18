@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PaperFeed from './components/PaperFeed';
 import PaperDetail from './components/PaperDetail';
+import Login from './components/Login';
+import Register from './components/Register';
+import UserProfile from './components/UserProfile';
 
 function App() {
   const Layout = () => {
@@ -26,6 +29,9 @@ function App() {
             <Routes>
               <Route path="/" element={<PaperFeed />} />
               <Route path="/paper/:arxivId" element={<PaperDetail />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/user/:username" element={<UserProfile />} />
             </Routes>
           </tbody>
         </table>

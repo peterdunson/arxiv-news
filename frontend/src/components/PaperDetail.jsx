@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPaper, getComments, addComment } from '../api';
+import { getPaper, getComments, addComment, votePaper, voteComment } from '../api';
 
 export default function PaperDetail() {
   const { arxivId } = useParams();
@@ -10,9 +10,6 @@ export default function PaperDetail() {
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [userName, setUserName] = useState(() => {
-    return localStorage.getItem('userName') || '';
-  });
 
   useEffect(() => {
     loadPaper();
@@ -41,20 +38,52 @@ export default function PaperDetail() {
 
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim() || !userName.trim()) return;
+
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      alert('Please login to comment');
+      navigate('/login');
+      return;
+    }
+
+    if (!newComment.trim()) return;
 
     setCommentLoading(true);
     try {
-      await addComment(arxivId, userName, newComment);
+      await addComment(arxivId, newComment);
       setNewComment('');
-      localStorage.setItem('userName', userName);
       await loadComments();
       await loadPaper();
     } catch (error) {
       console.error('Failed to add comment:', error);
-      alert('Failed to add comment. Please try again.');
+      if (error.response?.status === 401) {
+        alert('Please login to comment');
+        navigate('/login');
+      } else {
+        alert('Failed to add comment. Please try again.');
+      }
     }
     setCommentLoading(false);
+  };
+
+  const handleVoteComment = async (commentId) => {
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      alert('Please login to vote');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await voteComment(commentId);
+      await loadComments();
+    } catch (error) {
+      console.error('Failed to vote comment:', error);
+      if (error.response?.status === 401) {
+        alert('Please login to vote');
+        navigate('/login');
+      }
+    }
   };
 
   const formatTimeAgo = (dateStr) => {
@@ -169,16 +198,6 @@ export default function PaperDetail() {
               <td colSpan={1} />
               <td>
                 <form onSubmit={handleAddComment} style={{ marginBottom: '20px' }}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <input
-                      type="text"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      placeholder="username"
-                      required
-                      style={{ padding: '4px', width: '200px', marginRight: '10px' }}
-                    />
-                  </div>
                   <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
@@ -202,7 +221,17 @@ export default function PaperDetail() {
             {/* Comments */}
             {comments.map((comment) => (
               <tr key={comment.id} className="athing comtr">
-                <td />
+                <td style={{ verticalAlign: 'top' }}>
+                  <div style={{ textAlign: 'center', paddingTop: '4px' }}>
+                    <a
+                      onClick={() => handleVoteComment(comment.id)}
+                      className={comment.user_voted ? 'nosee' : ''}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="votearrow" title="upvote" />
+                    </a>
+                  </div>
+                </td>
                 <td>
                   <table style={{ border: '0' }}>
                     <tbody>
@@ -210,11 +239,19 @@ export default function PaperDetail() {
                         <td className="default">
                           <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                             <span className="comhead">
-                              <a className="hnuser">{comment.user_name}</a>
+                              <a
+                                onClick={() => navigate(`/user/${comment.username}`)}
+                                className="hnuser"
+                                style={{ cursor: 'pointer' }}
+                              >
+                                {comment.username}
+                              </a>
                               <span className="age">
                                 {' '}
                                 {formatTimeAgo(comment.created_at)}
                               </span>
+                              {' | '}
+                              <span className="score">{comment.vote_count} points</span>
                             </span>
                           </div>
                           <br />

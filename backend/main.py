@@ -1,20 +1,29 @@
 import os
 import asyncio
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import json
+from jose import JWTError, jwt
+from pydantic import BaseModel, EmailStr
 
 from database import get_db, init_db
-from models import Paper, Vote, Comment
-from pydantic import BaseModel
+from models import Paper, Vote, Comment, User, CommentVote
 
 app = FastAPI(title="arXiv News API")
 
 # Background task state
 last_scrape_time = None
+
+# JWT Settings
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+
+security = HTTPBearer()
 
 # CORS origins from environment variable or default to localhost
 CORS_ORIGINS = os.getenv(
@@ -69,6 +78,47 @@ async def delayed_auto_scraper():
         # Wait 24 hours before next run
         await asyncio.sleep(24 * 60 * 60)
 
+# Authentication helper functions
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> User:
+    token = credentials.credentials
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: int = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise credentials_exception
+    return user
+
+def get_optional_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    if not credentials:
+        return None
+    try:
+        return get_current_user(credentials, db)
+    except HTTPException:
+        return None
+
 # Pydantic models for API
 class PaperResponse(BaseModel):
     id: int
@@ -89,17 +139,56 @@ class PaperResponse(BaseModel):
         from_attributes = True
 
 class CommentCreate(BaseModel):
-    user_name: str
     content: str
 
 class CommentResponse(BaseModel):
     id: int
-    user_name: str
+    user_id: int
+    username: str
     content: str
+    vote_count: int
     created_at: str
-    
+    user_voted: bool = False
+
     class Config:
         from_attributes = True
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    bio: Optional[str]
+    karma: int
+    created_at: str
+
+    class Config:
+        from_attributes = True
+
+class UserPublicProfile(BaseModel):
+    username: str
+    bio: Optional[str]
+    karma: int
+    created_at: str
+
+    class Config:
+        from_attributes = True
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserResponse
+
+class UserUpdate(BaseModel):
+    bio: Optional[str] = None
 
 # Routes
 @app.get("/")
@@ -139,6 +228,111 @@ def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Scrape failed: {str(e)}")
+
+# Auth routes
+@app.post("/auth/register", response_model=TokenResponse)
+def register(user_data: UserCreate, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.username == user_data.username).first():
+        raise HTTPException(status_code=400, detail="Username already taken")
+
+    if db.query(User).filter(User.email == user_data.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    if not user_data.username.isalnum() or len(user_data.username) < 3 or len(user_data.username) > 20:
+        raise HTTPException(status_code=400, detail="Username must be 3-20 alphanumeric characters")
+
+    user = User(
+        username=user_data.username,
+        email=user_data.email,
+        password_hash=User.hash_password(user_data.password)
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    access_token = create_access_token(data={"sub": user.id})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": UserResponse(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            bio=user.bio,
+            karma=user.karma,
+            created_at=user.created_at.isoformat()
+        )
+    }
+
+@app.post("/auth/login", response_model=TokenResponse)
+def login(login_data: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == login_data.email).first()
+
+    if not user or not user.verify_password(login_data.password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    access_token = create_access_token(data={"sub": user.id})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": UserResponse(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            bio=user.bio,
+            karma=user.karma,
+            created_at=user.created_at.isoformat()
+        )
+    }
+
+@app.get("/auth/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        bio=current_user.bio,
+        karma=current_user.karma,
+        created_at=current_user.created_at.isoformat()
+    )
+
+@app.get("/users/{username}", response_model=UserPublicProfile)
+def get_user_profile(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return UserPublicProfile(
+        username=user.username,
+        bio=user.bio,
+        karma=user.karma,
+        created_at=user.created_at.isoformat()
+    )
+
+@app.patch("/users/me", response_model=UserResponse)
+def update_profile(
+    update_data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if update_data.bio is not None:
+        if len(update_data.bio) > 160:
+            raise HTTPException(status_code=400, detail="Bio must be 160 characters or less")
+        current_user.bio = update_data.bio
+
+    db.commit()
+    db.refresh(current_user)
+
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        bio=current_user.bio,
+        karma=current_user.karma,
+        created_at=current_user.created_at.isoformat()
+    )
 
 @app.get("/papers", response_model=List[PaperResponse])
 def get_papers(
@@ -218,70 +412,124 @@ def get_paper(arxiv_id: str, db: Session = Depends(get_db)):
 @app.post("/papers/{arxiv_id}/vote")
 def vote_paper(
     arxiv_id: str,
-    user_identifier: str,  # Will be IP or session
+    user_identifier: str,  # Can be anonymous or user_id
+    current_user: Optional[User] = Depends(get_optional_user),
     db: Session = Depends(get_db)
 ):
-    """Upvote a paper"""
+    """Upvote a paper (works for both logged in and anonymous users)"""
     paper = db.query(Paper).filter(Paper.arxiv_id == arxiv_id).first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
-    
+
+    # Use user_id if logged in, otherwise use anonymous identifier
+    vote_identifier = str(current_user.id) if current_user else user_identifier
+
     # Check if already voted
     existing_vote = db.query(Vote).filter(
         Vote.paper_id == paper.id,
-        Vote.user_identifier == user_identifier
+        Vote.user_identifier == vote_identifier
     ).first()
-    
+
     if existing_vote:
         # Remove vote (unvote)
         db.delete(existing_vote)
         paper.vote_count -= 1
     else:
         # Add vote
-        vote = Vote(paper_id=paper.id, user_identifier=user_identifier)
+        vote = Vote(paper_id=paper.id, user_identifier=vote_identifier)
         db.add(vote)
         paper.vote_count += 1
-    
+
     db.commit()
-    return {"vote_count": paper.vote_count}
+    return {"vote_count": paper.vote_count, "user_voted": not existing_vote}
 
 @app.get("/papers/{arxiv_id}/comments", response_model=List[CommentResponse])
-def get_comments(arxiv_id: str, db: Session = Depends(get_db)):
+def get_comments(
+    arxiv_id: str,
+    current_user: Optional[User] = Depends(get_optional_user),
+    db: Session = Depends(get_db)
+):
     """Get comments for a paper"""
     paper = db.query(Paper).filter(Paper.arxiv_id == arxiv_id).first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
-    
+
     comments = db.query(Comment).filter(Comment.paper_id == paper.id).order_by(Comment.created_at.desc()).all()
-    
-    return [
-        CommentResponse(
+
+    # Get user's comment votes if logged in
+    user_votes = set()
+    if current_user:
+        votes = db.query(CommentVote.comment_id).filter(CommentVote.user_id == current_user.id).all()
+        user_votes = {v.comment_id for v in votes}
+
+    result = []
+    for c in comments:
+        user = db.query(User).filter(User.id == c.user_id).first()
+        result.append(CommentResponse(
             id=c.id,
-            user_name=c.user_name,
+            user_id=c.user_id,
+            username=user.username if user else "deleted",
             content=c.content,
-            created_at=c.created_at.isoformat()
-        )
-        for c in comments
-    ]
+            vote_count=c.vote_count,
+            created_at=c.created_at.isoformat(),
+            user_voted=c.id in user_votes
+        ))
+
+    return result
 
 @app.post("/papers/{arxiv_id}/comments")
 def add_comment(
     arxiv_id: str,
     comment_data: CommentCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Add a comment to a paper"""
     paper = db.query(Paper).filter(Paper.arxiv_id == arxiv_id).first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
-    
+
     comment = Comment(
         paper_id=paper.id,
-        user_name=comment_data.user_name,
+        user_id=current_user.id,
         content=comment_data.content
     )
     db.add(comment)
     paper.comment_count += 1
     db.commit()
-    
+
     return {"message": "Comment added", "id": comment.id}
+
+@app.post("/comments/{comment_id}/vote")
+def vote_comment(
+    comment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    existing_vote = db.query(CommentVote).filter(
+        CommentVote.comment_id == comment_id,
+        CommentVote.user_id == current_user.id
+    ).first()
+
+    if existing_vote:
+        db.delete(existing_vote)
+        comment.vote_count -= 1
+
+        commenter = db.query(User).filter(User.id == comment.user_id).first()
+        if commenter:
+            commenter.karma -= 1
+    else:
+        vote = CommentVote(comment_id=comment_id, user_id=current_user.id)
+        db.add(vote)
+        comment.vote_count += 1
+
+        commenter = db.query(User).filter(User.id == comment.user_id).first()
+        if commenter:
+            commenter.karma += 1
+
+    db.commit()
+    return {"vote_count": comment.vote_count, "user_voted": not existing_vote}

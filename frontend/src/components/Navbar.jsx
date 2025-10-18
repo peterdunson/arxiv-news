@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { ALL_CATEGORIES } from '../utils/categories';
+import { logout } from '../api';
 
 export default function Navbar() {
   const [searchParams] = useSearchParams();
@@ -8,15 +9,24 @@ export default function Navbar() {
   const currentSort = searchParams.get('sort') || 'hot';
   const currentCat = searchParams.get('cat') || 'all';
   const currentSearch = searchParams.get('q') || '';
-  
+
   const [searchInput, setSearchInput] = useState(currentSearch);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const dropdownRef = useRef(null);
 
   // Update search input when URL changes
   useEffect(() => {
     setSearchInput(currentSearch);
   }, [currentSearch]);
+
+  // Load current user
+  useEffect(() => {
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+      setCurrentUser(JSON.parse(user));
+    }
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -52,6 +62,13 @@ export default function Navbar() {
     params.set('cat', categoryId);
     navigate(`/?${params.toString()}`);
     setShowDropdown(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+    navigate('/');
+    window.location.reload();
   };
 
   return (
@@ -208,7 +225,17 @@ export default function Navbar() {
                       </button>
                     )}
                   </form>
-                  <Link to="#" onClick={(e) => { e.preventDefault(); alert('coming soon...'); }} style={{ color: '#ffffff' }}>login</Link>
+                  {currentUser ? (
+                    <>
+                      <Link to={`/user/${currentUser.username}`} style={{ color: '#ffffff' }}>
+                        {currentUser.username} ({currentUser.karma})
+                      </Link>
+                      {' | '}
+                      <a onClick={handleLogout} style={{ color: '#ffffff', cursor: 'pointer' }}>logout</a>
+                    </>
+                  ) : (
+                    <Link to="/login" style={{ color: '#ffffff' }}>login</Link>
+                  )}
                 </span>
               </td>
             </tr>
