@@ -22,10 +22,22 @@ export default function Navbar() {
 
   // Load current user
   useEffect(() => {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      setCurrentUser(JSON.parse(user));
-    }
+    const loadUser = () => {
+      const user = localStorage.getItem('currentUser');
+      if (user) {
+        setCurrentUser(JSON.parse(user));
+      }
+    };
+
+    // Load on mount
+    loadUser();
+
+    // Listen for login events
+    window.addEventListener('userLoggedIn', loadUser);
+
+    return () => {
+      window.removeEventListener('userLoggedIn', loadUser);
+    };
   }, []);
 
   // Close dropdown when clicking outside

@@ -16,8 +16,9 @@ export default function Login() {
 
     try {
       await login(email, password);
+      // Force Navbar to re-render by dispatching a custom event
+      window.dispatchEvent(new Event('userLoggedIn'));
       navigate('/');
-      window.location.reload();
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed');
     } finally {
