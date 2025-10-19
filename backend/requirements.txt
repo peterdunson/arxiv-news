@@ -1,4 +1,4 @@
-# Updated 2025-01-18-v2
+# Updated 2025-01-18-v3
 fastapi==0.117.1
 uvicorn==0.36.0
 sqlalchemy==2.0.44
@@ -8,6 +8,7 @@ requests==2.32.5
 alembic==1.17.0
 pydantic==2.11.9
 python-dotenv==1.1.1
+bcrypt==4.0.1
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.9
