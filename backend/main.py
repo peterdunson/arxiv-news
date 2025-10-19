@@ -99,10 +99,11 @@ def get_current_user(
         print(f"Attempting to decode token: {token[:20]}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         print(f"Decoded payload: {payload}")
-        user_id: int = payload.get("sub")
-        if user_id is None:
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
             print("No 'sub' field in payload")
             raise credentials_exception
+        user_id = int(user_id_str)
         print(f"User ID from token: {user_id}")
     except JWTError as e:
         print(f"JWT decode error: {e}")
@@ -257,7 +258,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
 
     return {
         "access_token": access_token,
@@ -279,7 +280,7 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
     if not user or not user.verify_password(login_data.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
 
     return {
         "access_token": access_token,
