@@ -33,6 +33,15 @@ export default function UserProfile() {
 
   const handleUpdateBio = async (e) => {
     e.preventDefault();
+
+    // Check if user is logged in
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert('Please login to update your bio');
+      navigate('/login');
+      return;
+    }
+
     try {
       await updateProfile(newBio);
       setProfile({ ...profile, bio: newBio });
@@ -41,7 +50,16 @@ export default function UserProfile() {
       user.bio = newBio;
       localStorage.setItem('currentUser', JSON.stringify(user));
     } catch (err) {
-      alert('Failed to update bio');
+      console.error('Bio update error:', err);
+      const errorMessage = err.response?.data?.detail || err.message || 'Failed to update bio';
+      alert(`Failed to update bio: ${errorMessage}`);
+
+      // If it's an auth error, redirect to login
+      if (err.response?.status === 401) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        navigate('/login');
+      }
     }
   };
 

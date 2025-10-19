@@ -48,9 +48,13 @@ export const getUserProfile = async (username) => {
 };
 
 export const updateProfile = async (bio) => {
+  const headers = getAuthHeader();
+  console.log('Update profile - Auth headers:', headers);
+  console.log('Update profile - Token from localStorage:', localStorage.getItem('authToken'));
+
   const response = await axios.patch(`${API_BASE}/users/me`,
     { bio },
-    { headers: getAuthHeader() }
+    { headers }
   );
   return response.data;
 };
