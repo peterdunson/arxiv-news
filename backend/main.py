@@ -218,16 +218,16 @@ def get_status(db: Session = Depends(get_db)):
         "auto_scraper_enabled": True
     }
 
-@app.get("/admin/scrape")
+@app.post("/admin/scrape")
 def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
     """Manually trigger a scrape (admin endpoint)"""
     try:
         from scraper import scrape_latest_papers
         scrape_latest_papers(max_results=max_results)
-        
+
         global last_scrape_time
         last_scrape_time = datetime.now()
-        
+
         paper_count = db.query(Paper).count()
         return {
             "status": "success",
@@ -236,6 +236,52 @@ def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Scrape failed: {str(e)}")
+
+@app.post("/admin/migrate-comments")
+def migrate_comments_table(db: Session = Depends(get_db)):
+    """One-time migration to update comments table schema"""
+    try:
+        from sqlalchemy import text
+
+        # Drop old tables
+        db.execute(text("DROP TABLE IF EXISTS comment_votes CASCADE"))
+        db.execute(text("DROP TABLE IF EXISTS comments CASCADE"))
+
+        # Create new comments table
+        db.execute(text("""
+            CREATE TABLE comments (
+                id SERIAL PRIMARY KEY,
+                paper_id INTEGER NOT NULL REFERENCES papers(id),
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                content TEXT NOT NULL,
+                vote_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+
+        # Create comment_votes table
+        db.execute(text("""
+            CREATE TABLE comment_votes (
+                id SERIAL PRIMARY KEY,
+                comment_id INTEGER NOT NULL REFERENCES comments(id),
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(comment_id, user_id)
+            )
+        """))
+
+        # Reset comment counts
+        db.execute(text("UPDATE papers SET comment_count = 0"))
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "message": "Comments table migrated successfully"
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Migration failed: {str(e)}")
 
 # Auth routes
 @app.post("/auth/register", response_model=TokenResponse)
