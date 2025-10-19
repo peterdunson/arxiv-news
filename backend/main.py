@@ -96,16 +96,23 @@ def get_current_user(
         detail="Could not validate credentials",
     )
     try:
+        print(f"Attempting to decode token: {token[:20]}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"Decoded payload: {payload}")
         user_id: int = payload.get("sub")
         if user_id is None:
+            print("No 'sub' field in payload")
             raise credentials_exception
-    except JWTError:
+        print(f"User ID from token: {user_id}")
+    except JWTError as e:
+        print(f"JWT decode error: {e}")
         raise credentials_exception
 
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
+        print(f"No user found with ID: {user_id}")
         raise credentials_exception
+    print(f"Found user: {user.username}")
     return user
 
 def get_optional_user(
