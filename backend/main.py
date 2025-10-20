@@ -207,9 +207,9 @@ def root():
 def get_status(db: Session = Depends(get_db)):
     """Get API and scraper status"""
     global last_scrape_time
-    
+
     paper_count = db.query(Paper).count()
-    
+
     return {
         "status": "running",
         "total_papers": paper_count,
@@ -217,6 +217,45 @@ def get_status(db: Session = Depends(get_db)):
         "next_scrape": (last_scrape_time + timedelta(hours=24)).isoformat() if last_scrape_time else None,
         "auto_scraper_enabled": True
     }
+
+@app.get("/sitemap.xml")
+def get_sitemap(db: Session = Depends(get_db)):
+    """Generate sitemap for SEO"""
+    from fastapi.responses import Response
+
+    papers = db.query(Paper).order_by(Paper.created_at.desc()).limit(1000).all()
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+
+    # Homepage
+    xml += '  <url>\n'
+    xml += '    <loc>https://arxiv-news.com/</loc>\n'
+    xml += '    <changefreq>hourly</changefreq>\n'
+    xml += '    <priority>1.0</priority>\n'
+    xml += '  </url>\n'
+
+    # Category pages
+    categories = ['all', 'cs.AI', 'cs.LG', 'cs.CV', 'cs.CL', 'cs.RO', 'stat.ML', 'math', 'physics', 'quant-ph']
+    for cat in categories:
+        xml += '  <url>\n'
+        xml += f'    <loc>https://arxiv-news.com/?cat={cat}</loc>\n'
+        xml += '    <changefreq>daily</changefreq>\n'
+        xml += '    <priority>0.8</priority>\n'
+        xml += '  </url>\n'
+
+    # Paper pages
+    for paper in papers:
+        xml += '  <url>\n'
+        xml += f'    <loc>https://arxiv-news.com/paper/{paper.arxiv_id}</loc>\n'
+        xml += f'    <lastmod>{paper.created_at.strftime("%Y-%m-%d")}</lastmod>\n'
+        xml += '    <changefreq>weekly</changefreq>\n'
+        xml += '    <priority>0.6</priority>\n'
+        xml += '  </url>\n'
+
+    xml += '</urlset>'
+
+    return Response(content=xml, media_type="application/xml")
 
 @app.post("/admin/scrape")
 def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):
