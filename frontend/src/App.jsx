@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import PaperFeed from './components/PaperFeed';
 import PaperDetail from './components/PaperDetail';
 import Login from './components/Login';
@@ -33,6 +34,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/user/:username" element={<UserProfile />} />
             </Routes>
+            <Footer />
           </tbody>
         </table>
       </center>
