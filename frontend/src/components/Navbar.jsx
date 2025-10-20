@@ -89,7 +89,7 @@ export default function Navbar() {
         <table style={{ border: '0px', padding: '2px', borderSpacing: '0px', width: '100%' }}>
           <tbody>
             <tr>
-              <td style={{ width: '18px', padding: '0px', paddingRight: '4px' }}>
+              <td style={{ width: '18px', padding: '0px', paddingRight: '4px', verticalAlign: 'middle' }}>
                 <Link to="/">
                   <img
                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect fill='white' x='0' y='0' width='18' height='18'/%3E%3Ctext x='9' y='14' font-size='16' text-anchor='middle' fill='%23b31b1b'%3EA%3C/text%3E%3C/svg%3E"
@@ -100,6 +100,7 @@ export default function Navbar() {
                       borderStyle: 'solid',
                       height: '18px',
                       width: '18px',
+                      verticalAlign: 'middle',
                     }}
                   />
                 </Link>
