@@ -1,1 +1,4 @@
 node_modules/
+boost_papers.py
+*.pyc
+__pycache__/
