@@ -92,7 +92,7 @@ export default function Navbar() {
               <td style={{ width: '18px', padding: '0px', paddingRight: '4px' }}>
                 <Link to="/">
                   <img
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect fill='white' x='0' y='0' width='18' height='18'/%3E%3Ctext x='9' y='13.5' font-size='14' text-anchor='middle' dominant-baseline='middle' fill='%23b31b1b'%3EA%3C/text%3E%3C/svg%3E"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Crect fill='white' x='0' y='0' width='18' height='18'/%3E%3Ctext x='9' y='14' font-size='16' text-anchor='middle' fill='%23b31b1b'%3EA%3C/text%3E%3C/svg%3E"
                     alt="arXiv"
                     style={{
                       border: '1px',
