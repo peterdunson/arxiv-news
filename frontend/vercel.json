@@ -3,5 +3,11 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm install",
-  "devCommand": "npm run dev"
+  "devCommand": "npm run dev",
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://arxiv-news-api-production.up.railway.app/sitemap.xml"
+    }
+  ]
 }
