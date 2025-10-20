@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { ALL_CATEGORIES } from '../utils/categories';
-import { logout } from '../api';
+import { logout, getCurrentUser } from '../api';
 
 export default function Navbar() {
   const [searchParams] = useSearchParams();
@@ -22,10 +22,17 @@ export default function Navbar() {
 
   // Load current user
   useEffect(() => {
-    const loadUser = () => {
-      const user = localStorage.getItem('currentUser');
-      if (user) {
-        setCurrentUser(JSON.parse(user));
+    const loadUser = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          const userData = await getCurrentUser();
+          setCurrentUser(userData);
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+        } catch (err) {
+          console.error('Failed to load user:', err);
+          setCurrentUser(null);
+        }
       }
     };
 
