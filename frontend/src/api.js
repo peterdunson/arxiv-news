@@ -107,3 +107,48 @@ export const voteComment = async (commentId) => {
   );
   return response.data;
 };
+
+// Post (Show AN) functions
+export const getPosts = async (sort = 'hot', limit = 30) => {
+  const response = await axios.get(`${API_BASE}/posts`, {
+    params: { sort, limit }
+  });
+  return response.data;
+};
+
+export const getPost = async (postId) => {
+  const response = await axios.get(`${API_BASE}/posts/${postId}`);
+  return response.data;
+};
+
+export const createPost = async (title, url, text) => {
+  const response = await axios.post(
+    `${API_BASE}/posts`,
+    { title, url, text },
+    { headers: getAuthHeader() }
+  );
+  return response.data;
+};
+
+export const votePost = async (postId) => {
+  const response = await axios.post(
+    `${API_BASE}/posts/${postId}/vote`,
+    {},
+    { headers: getAuthHeader() }
+  );
+  return response.data;
+};
+
+export const getPostComments = async (postId) => {
+  const response = await axios.get(`${API_BASE}/posts/${postId}/comments`);
+  return response.data;
+};
+
+export const addPostComment = async (postId, content) => {
+  const response = await axios.post(
+    `${API_BASE}/posts/${postId}/comments`,
+    { content },
+    { headers: getAuthHeader() }
+  );
+  return response.data;
+};

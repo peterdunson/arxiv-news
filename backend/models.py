@@ -24,6 +24,9 @@ class User(Base):
 
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
     comment_votes = relationship("CommentVote", back_populates="user", cascade="all, delete-orphan")
+    posts = relationship("Post", back_populates="user", cascade="all, delete-orphan")
+    post_votes = relationship("PostVote", back_populates="user", cascade="all, delete-orphan")
+    post_comments = relationship("PostComment", back_populates="user", cascade="all, delete-orphan")
 
     def verify_password(self, password: str) -> bool:
         return pwd_context.verify(password, self.password_hash)
@@ -108,3 +111,52 @@ class CommentVote(Base):
     __table_args__ = (
         sqlalchemy.UniqueConstraint('comment_id', 'user_id', name='_comment_user_vote_uc'),
     )
+
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String, nullable=False)
+    url = Column(String, nullable=True)  # Optional URL
+    text = Column(Text, nullable=True)  # Optional text content
+    vote_count = Column(Integer, default=0)
+    comment_count = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="posts")
+    post_votes = relationship("PostVote", back_populates="post", cascade="all, delete-orphan")
+    post_comments = relationship("PostComment", back_populates="post", cascade="all, delete-orphan")
+
+
+class PostVote(Base):
+    __tablename__ = "post_votes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    post = relationship("Post", back_populates="post_votes")
+    user = relationship("User", back_populates="post_votes")
+
+    __table_args__ = (
+        sqlalchemy.UniqueConstraint('post_id', 'user_id', name='_post_user_vote_uc'),
+    )
+
+
+class PostComment(Base):
+    __tablename__ = "post_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    vote_count = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    post = relationship("Post", back_populates="post_comments")
+    user = relationship("User", back_populates="post_comments")

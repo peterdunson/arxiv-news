@@ -131,11 +131,11 @@ export default function Navbar() {
                   <Link to={`/?sort=${currentSort}&cat=math`} style={{ color: '#ffffff' }}>math</Link> |{' '}
                   <Link to={`/?sort=${currentSort}&cat=physics`} style={{ color: '#ffffff' }}>physics</Link> |{' '}
                   <Link to={`/?sort=${currentSort}&cat=quant-ph`} style={{ color: '#ffffff' }}>quantum</Link> |{' '}
-                  <span 
+                  <span
                     ref={dropdownRef}
                     style={{ position: 'relative', display: 'inline-block' }}
                   >
-                    <a 
+                    <a
                       onClick={() => setShowDropdown(!showDropdown)}
                       style={{ color: '#ffffff', cursor: 'pointer', userSelect: 'none' }}
                     >
@@ -206,6 +206,8 @@ export default function Navbar() {
                       </div>
                     )}
                   </span>
+                  {' | '}
+                  <Link to="/show" style={{ color: '#ffffff' }}>show</Link>
                 </span>
               </td>
               <td style={{ textAlign: 'right', padding: '0px', paddingRight: '4px' }}>

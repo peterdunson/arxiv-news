@@ -6,6 +6,9 @@ import PaperDetail from './components/PaperDetail';
 import Login from './components/Login';
 import Register from './components/Register';
 import UserProfile from './components/UserProfile';
+import ShowAN from './components/ShowAN';
+import SubmitPost from './components/SubmitPost';
+import PostDetail from './components/PostDetail';
 
 function App() {
   const Layout = () => {
@@ -30,6 +33,9 @@ function App() {
             <Routes>
               <Route path="/" element={<PaperFeed />} />
               <Route path="/paper/:arxivId" element={<PaperDetail />} />
+              <Route path="/show" element={<ShowAN />} />
+              <Route path="/submit" element={<SubmitPost />} />
+              <Route path="/post/:postId" element={<PostDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/user/:username" element={<UserProfile />} />

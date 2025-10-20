@@ -11,7 +11,7 @@ from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
 
 from database import get_db, init_db
-from models import Paper, Vote, Comment, User, CommentVote
+from models import Paper, Vote, Comment, User, CommentVote, Post, PostVote, PostComment
 
 app = FastAPI(title="arXiv News API")
 
@@ -626,3 +626,196 @@ def vote_comment(
 
     db.commit()
     return {"vote_count": comment.vote_count, "user_voted": not existing_vote}
+
+
+# Post (Show AN) endpoints
+class PostCreate(BaseModel):
+    title: str
+    url: Optional[str] = None
+    text: Optional[str] = None
+
+
+@app.get("/posts")
+def get_posts(
+    sort: str = "hot",
+    limit: int = 30,
+    db: Session = Depends(get_db)
+):
+    query = db.query(Post)
+
+    if sort == "new":
+        query = query.order_by(Post.created_at.desc())
+    else:  # hot
+        query = query.order_by(Post.vote_count.desc(), Post.created_at.desc())
+
+    posts = query.limit(limit).all()
+
+    result = []
+    for post in posts:
+        result.append({
+            "id": post.id,
+            "title": post.title,
+            "url": post.url,
+            "text": post.text,
+            "vote_count": post.vote_count,
+            "comment_count": post.comment_count,
+            "created_at": post.created_at.isoformat(),
+            "username": post.user.username,
+            "user_id": post.user_id
+        })
+
+    return result
+
+
+@app.post("/posts")
+def create_post(
+    post_data: PostCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Validate that at least url or text is provided
+    if not post_data.url and not post_data.text:
+        raise HTTPException(status_code=400, detail="Must provide either URL or text")
+
+    post = Post(
+        user_id=current_user.id,
+        title=post_data.title,
+        url=post_data.url,
+        text=post_data.text
+    )
+
+    db.add(post)
+    db.commit()
+    db.refresh(post)
+
+    return {
+        "id": post.id,
+        "title": post.title,
+        "url": post.url,
+        "text": post.text,
+        "vote_count": post.vote_count,
+        "comment_count": post.comment_count,
+        "created_at": post.created_at.isoformat(),
+        "username": current_user.username,
+        "user_id": current_user.id
+    }
+
+
+@app.get("/posts/{post_id}")
+def get_post(post_id: int, db: Session = Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    return {
+        "id": post.id,
+        "title": post.title,
+        "url": post.url,
+        "text": post.text,
+        "vote_count": post.vote_count,
+        "comment_count": post.comment_count,
+        "created_at": post.created_at.isoformat(),
+        "username": post.user.username,
+        "user_id": post.user_id
+    }
+
+
+@app.post("/posts/{post_id}/vote")
+def vote_post(
+    post_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    existing_vote = db.query(PostVote).filter(
+        PostVote.post_id == post_id,
+        PostVote.user_id == current_user.id
+    ).first()
+
+    if existing_vote:
+        db.delete(existing_vote)
+        post.vote_count -= 1
+
+        # Decrease poster's karma
+        poster = db.query(User).filter(User.id == post.user_id).first()
+        if poster:
+            poster.karma -= 1
+    else:
+        vote = PostVote(post_id=post_id, user_id=current_user.id)
+        db.add(vote)
+        post.vote_count += 1
+
+        # Increase poster's karma
+        poster = db.query(User).filter(User.id == post.user_id).first()
+        if poster:
+            poster.karma += 1
+
+    db.commit()
+    return {"vote_count": post.vote_count, "user_voted": not existing_vote}
+
+
+# Post comment endpoints
+class PostCommentCreate(BaseModel):
+    content: str
+
+
+@app.get("/posts/{post_id}/comments")
+def get_post_comments(post_id: int, db: Session = Depends(get_db)):
+    # Get current user if logged in
+    token = None
+    try:
+        from fastapi import Request
+        # This is a simplified check - in production you'd use proper dependency injection
+        pass
+    except:
+        pass
+
+    comments = db.query(PostComment).filter(PostComment.post_id == post_id).order_by(PostComment.created_at.desc()).all()
+
+    result = []
+    for comment in comments:
+        result.append({
+            "id": comment.id,
+            "content": comment.content,
+            "vote_count": comment.vote_count,
+            "created_at": comment.created_at.isoformat(),
+            "username": comment.user.username,
+            "user_id": comment.user_id
+        })
+
+    return result
+
+
+@app.post("/posts/{post_id}/comments")
+def add_post_comment(
+    post_id: int,
+    comment_data: PostCommentCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    comment = PostComment(
+        post_id=post_id,
+        user_id=current_user.id,
+        content=comment_data.content
+    )
+
+    db.add(comment)
+    post.comment_count += 1
+    db.commit()
+    db.refresh(comment)
+
+    return {
+        "id": comment.id,
+        "content": comment.content,
+        "vote_count": comment.vote_count,
+        "created_at": comment.created_at.isoformat(),
+        "username": current_user.username,
+        "user_id": current_user.id
+    }
