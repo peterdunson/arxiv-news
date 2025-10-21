@@ -11,6 +11,8 @@ export default function PaperDetail() {
   const [commentLoading, setCommentLoading] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [voted, setVoted] = useState(false);
+  const [replyTo, setReplyTo] = useState(null); // Track which comment we're replying to
+  const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
     loadPaper();
@@ -111,6 +113,37 @@ export default function PaperDetail() {
     }
   };
 
+  const handleReply = async (e, parentId) => {
+    e.preventDefault();
+
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      alert('Please login to reply');
+      navigate('/login');
+      return;
+    }
+
+    if (!replyText.trim()) return;
+
+    setCommentLoading(true);
+    try {
+      await addComment(arxivId, replyText, parentId);
+      setReplyText('');
+      setReplyTo(null);
+      await loadComments();
+      await loadPaper();
+    } catch (error) {
+      console.error('Failed to add reply:', error);
+      if (error.response?.status === 401) {
+        alert('Please login to reply');
+        navigate('/login');
+      } else {
+        alert('Failed to add reply. Please try again.');
+      }
+    }
+    setCommentLoading(false);
+  };
+
   const formatTimeAgo = (dateStr) => {
     const now = new Date();
     const published = new Date(dateStr);
@@ -127,6 +160,114 @@ export default function PaperDetail() {
   const formatAuthors = (authors) => {
     if (authors.length === 0) return 'unknown';
     return authors[0].split(' ').pop();
+  };
+
+  // Recursive function to render comment and its replies
+  const renderComment = (comment, depth = 0) => {
+    const indentWidth = depth * 40; // 40px per nesting level, like HN
+
+    return (
+      <tr key={comment.id} className="athing comtr">
+        <td style={{ verticalAlign: 'top' }}>
+          <div style={{ textAlign: 'center', paddingTop: '4px' }}>
+            <a
+              onClick={() => handleVoteComment(comment.id)}
+              className={comment.user_voted ? 'nosee' : ''}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="votearrow" title="upvote" />
+            </a>
+          </div>
+        </td>
+        <td>
+          <table style={{ border: '0' }}>
+            <tbody>
+              <tr>
+                <td className="default">
+                  <div style={{ marginTop: '2px', marginBottom: '-10px', marginLeft: `${indentWidth}px` }}>
+                    <span className="comhead">
+                      <a
+                        onClick={() => navigate(`/user/${comment.username}`)}
+                        className="hnuser"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {comment.username}
+                      </a>
+                      <span className="age">
+                        {' '}
+                        {formatTimeAgo(comment.created_at)}
+                      </span>
+                      {' | '}
+                      <span className="score">{comment.vote_count} points</span>
+                    </span>
+                  </div>
+                  <br />
+                  <div className="comment" style={{ marginLeft: `${indentWidth}px` }}>
+                    <span className="c00">{comment.content}</span>
+                    <p>
+                      <a
+                        onClick={() => setReplyTo(comment.id)}
+                        style={{ cursor: 'pointer', fontSize: '10px', textDecoration: 'underline' }}
+                      >
+                        reply
+                      </a>
+                    </p>
+                  </div>
+
+                  {/* Reply form */}
+                  {replyTo === comment.id && (
+                    <div style={{ marginLeft: `${indentWidth}px`, marginTop: '10px' }}>
+                      <form onSubmit={(e) => handleReply(e, comment.id)}>
+                        <textarea
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Add a reply..."
+                          rows="4"
+                          cols="60"
+                          required
+                          style={{ marginBottom: '8px' }}
+                        />
+                        <br />
+                        <input
+                          type="submit"
+                          value={commentLoading ? 'Replying...' : 'reply'}
+                          disabled={commentLoading}
+                          style={{ cursor: 'pointer', marginRight: '5px' }}
+                        />
+                        <input
+                          type="button"
+                          value="cancel"
+                          onClick={() => {
+                            setReplyTo(null);
+                            setReplyText('');
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </form>
+                    </div>
+                  )}
+                </td>
+              </tr>
+
+              {/* Recursively render replies */}
+              {comment.replies && comment.replies.length > 0 && (
+                comment.replies.map(reply => (
+                  <tr key={reply.id}>
+                    <td colSpan={2} style={{ padding: 0 }}>
+                      <table style={{ border: '0', width: '100%' }}>
+                        <tbody>
+                          {renderComment(reply, depth + 1)}
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    );
   };
 
   if (loading) {
@@ -249,52 +390,7 @@ export default function PaperDetail() {
             </tr>
 
             {/* Comments */}
-            {comments.map((comment) => (
-              <tr key={comment.id} className="athing comtr">
-                <td style={{ verticalAlign: 'top' }}>
-                  <div style={{ textAlign: 'center', paddingTop: '4px' }}>
-                    <a
-                      onClick={() => handleVoteComment(comment.id)}
-                      className={comment.user_voted ? 'nosee' : ''}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <div className="votearrow" title="upvote" />
-                    </a>
-                  </div>
-                </td>
-                <td>
-                  <table style={{ border: '0' }}>
-                    <tbody>
-                      <tr>
-                        <td className="default">
-                          <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
-                            <span className="comhead">
-                              <a
-                                onClick={() => navigate(`/user/${comment.username}`)}
-                                className="hnuser"
-                                style={{ cursor: 'pointer' }}
-                              >
-                                {comment.username}
-                              </a>
-                              <span className="age">
-                                {' '}
-                                {formatTimeAgo(comment.created_at)}
-                              </span>
-                              {' | '}
-                              <span className="score">{comment.vote_count} points</span>
-                            </span>
-                          </div>
-                          <br />
-                          <div className="comment">
-                            <span className="c00">{comment.content}</span>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            ))}
+            {comments.map((comment) => renderComment(comment))}
           </tbody>
         </table>
       </td>

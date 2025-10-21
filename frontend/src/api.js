@@ -90,10 +90,10 @@ export const getComments = async (arxivId) => {
   return response.data;
 };
 
-export const addComment = async (arxivId, content) => {
+export const addComment = async (arxivId, content, parentId = null) => {
   const response = await axios.post(
     `${API_BASE}/papers/${arxivId}/comments`,
-    { content },
+    { content, parent_id: parentId },
     { headers: getAuthHeader() }
   );
   return response.data;

@@ -87,6 +87,7 @@ class Comment(Base):
     id = Column(Integer, primary_key=True, index=True)
     paper_id = Column(Integer, ForeignKey("papers.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    parent_id = Column(Integer, ForeignKey("comments.id"), nullable=True)  # For threaded comments
     content = Column(Text, nullable=False)
     vote_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -95,6 +96,9 @@ class Comment(Base):
     paper = relationship("Paper", back_populates="comments")
     user = relationship("User", back_populates="comments")
     comment_votes = relationship("CommentVote", back_populates="comment", cascade="all, delete-orphan")
+
+    # Self-referential relationship for replies
+    replies = relationship("Comment", backref="parent", remote_side=[id])
 
 
 class CommentVote(Base):

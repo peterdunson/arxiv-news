@@ -148,6 +148,7 @@ class PaperResponse(BaseModel):
 
 class CommentCreate(BaseModel):
     content: str
+    parent_id: Optional[int] = None
 
 class CommentResponse(BaseModel):
     id: int
@@ -547,7 +548,11 @@ def get_comments(
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
 
-    comments = db.query(Comment).filter(Comment.paper_id == paper.id).order_by(Comment.created_at.desc()).all()
+    # Only get top-level comments (parent_id is null)
+    comments = db.query(Comment).filter(
+        Comment.paper_id == paper.id,
+        Comment.parent_id == None
+    ).order_by(Comment.created_at.desc()).all()
 
     # Get user's comment votes if logged in
     user_votes = set()
@@ -555,18 +560,25 @@ def get_comments(
         votes = db.query(CommentVote.comment_id).filter(CommentVote.user_id == current_user.id).all()
         user_votes = {v.comment_id for v in votes}
 
-    result = []
-    for c in comments:
-        user = db.query(User).filter(User.id == c.user_id).first()
-        result.append(CommentResponse(
-            id=c.id,
-            user_id=c.user_id,
-            username=user.username if user else "deleted",
-            content=c.content,
-            vote_count=c.vote_count,
-            created_at=c.created_at.isoformat(),
-            user_voted=c.id in user_votes
-        ))
+    def build_comment_tree(comment):
+        """Recursively build comment tree with replies"""
+        user = db.query(User).filter(User.id == comment.user_id).first()
+
+        # Get replies
+        replies = db.query(Comment).filter(Comment.parent_id == comment.id).order_by(Comment.created_at.asc()).all()
+
+        return {
+            "id": comment.id,
+            "user_id": comment.user_id,
+            "username": user.username if user else "deleted",
+            "content": comment.content,
+            "vote_count": comment.vote_count,
+            "created_at": comment.created_at.isoformat(),
+            "user_voted": comment.id in user_votes,
+            "replies": [build_comment_tree(reply) for reply in replies]
+        }
+
+    result = [build_comment_tree(c) for c in comments]
 
     return result
 
@@ -582,10 +594,17 @@ def add_comment(
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
 
+    # Validate parent comment exists if parent_id is provided
+    if comment_data.parent_id:
+        parent_comment = db.query(Comment).filter(Comment.id == comment_data.parent_id).first()
+        if not parent_comment:
+            raise HTTPException(status_code=404, detail="Parent comment not found")
+
     comment = Comment(
         paper_id=paper.id,
         user_id=current_user.id,
-        content=comment_data.content
+        content=comment_data.content,
+        parent_id=comment_data.parent_id
     )
     db.add(comment)
     paper.comment_count += 1
