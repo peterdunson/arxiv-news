@@ -10,10 +10,15 @@ export default function PaperDetail() {
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [voted, setVoted] = useState(false);
 
   useEffect(() => {
     loadPaper();
     loadComments();
+
+    // Check if already voted
+    const votedPapers = JSON.parse(localStorage.getItem('votedPapers') || '{}');
+    setVoted(!!votedPapers[arxivId]);
   }, [arxivId]);
 
   const loadPaper = async () => {
@@ -64,6 +69,26 @@ export default function PaperDetail() {
       }
     }
     setCommentLoading(false);
+  };
+
+  const handleVotePaper = async (e) => {
+    e.preventDefault();
+
+    try {
+      const result = await votePaper(arxivId, 'anonymous');
+      setPaper({ ...paper, vote_count: result.vote_count });
+      setVoted(result.user_voted);
+
+      const votedPapers = JSON.parse(localStorage.getItem('votedPapers') || '{}');
+      if (result.user_voted) {
+        votedPapers[arxivId] = true;
+      } else {
+        delete votedPapers[arxivId];
+      }
+      localStorage.setItem('votedPapers', JSON.stringify(votedPapers));
+    } catch (error) {
+      console.error('Vote failed:', error);
+    }
   };
 
   const handleVoteComment = async (commentId) => {
@@ -134,7 +159,13 @@ export default function PaperDetail() {
             <tr className="athing">
               <td style={{ verticalAlign: 'top' }} className="votelinks">
                 <div style={{ textAlign: 'center', padding: '0 10px' }}>
-                  <div className="votearrow" title="upvote" style={{ cursor: 'pointer' }} />
+                  <a
+                    className={voted ? 'nosee' : ''}
+                    onClick={handleVotePaper}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="votearrow" title="upvote" />
+                  </a>
                 </div>
               </td>
               <td className="title">

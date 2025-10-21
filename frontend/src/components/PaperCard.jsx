@@ -14,15 +14,18 @@ export default function PaperCard({ paper, rank }) {
 
   const handleVote = async (e) => {
     e.preventDefault();
-    if (voted) return; // Already voted
-    
+
     try {
       const result = await votePaper(paper.arxiv_id, 'anonymous');
       setVotes(result.vote_count);
-      setVoted(true);
+      setVoted(result.user_voted);
 
       const votedPapers = JSON.parse(localStorage.getItem('votedPapers') || '{}');
-      votedPapers[paper.arxiv_id] = true;
+      if (result.user_voted) {
+        votedPapers[paper.arxiv_id] = true;
+      } else {
+        delete votedPapers[paper.arxiv_id];
+      }
       localStorage.setItem('votedPapers', JSON.stringify(votedPapers));
     } catch (error) {
       console.error('Vote failed:', error);
