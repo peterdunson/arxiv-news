@@ -4,8 +4,6 @@
 
 A Hacker News-style platform for discovering and discussing research papers from arXiv.
 
-![Visitor Count](https://visitor-badge.laobi.icu/badge?page_id=peterdunson.arxiv-news)
-
 **🌐 Live:** [arxiv-news.com](https://arxiv-news.com)
 
 ## Features
