@@ -82,11 +82,10 @@ export default function PaperCard({ paper, rank }) {
         <td style={{ verticalAlign: 'top' }} className="votelinks">
           <div style={{ textAlign: 'center' }}>
             <a
-              className={voted ? 'nosee' : ''}
               onClick={handleVote}
               style={{ cursor: 'pointer' }}
             >
-              <div className="votearrow" title="upvote" />
+              <div className={voted ? 'votearrow voted' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
             </a>
           </div>
         </td>

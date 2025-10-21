@@ -160,11 +160,10 @@ export default function PaperDetail() {
               <td style={{ verticalAlign: 'top' }} className="votelinks">
                 <div style={{ textAlign: 'center', padding: '0 10px' }}>
                   <a
-                    className={voted ? 'nosee' : ''}
                     onClick={handleVotePaper}
                     style={{ cursor: 'pointer' }}
                   >
-                    <div className="votearrow" title="upvote" />
+                    <div className={voted ? 'votearrow voted' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
                   </a>
                 </div>
               </td>
