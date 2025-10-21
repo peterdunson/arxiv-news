@@ -163,7 +163,7 @@ export default function PaperDetail() {
                     onClick={handleVotePaper}
                     style={{ cursor: 'pointer' }}
                   >
-                    <div className={voted ? 'votearrow voted' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
+                    <div className={voted ? 'votearrow rotate180' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
                   </a>
                 </div>
               </td>

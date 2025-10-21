@@ -85,7 +85,7 @@ export default function PaperCard({ paper, rank }) {
               onClick={handleVote}
               style={{ cursor: 'pointer' }}
             >
-              <div className={voted ? 'votearrow voted' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
+              <div className={voted ? 'votearrow rotate180' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
             </a>
           </div>
         </td>

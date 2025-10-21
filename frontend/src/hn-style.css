@@ -49,6 +49,10 @@ pre:hover { overflow:auto }
   no-repeat;
 }
 
+.rotate180 {
+  transform: rotate(180deg);
+}
+
 .rank {
   color: #828282;
   font-size: 10pt;
