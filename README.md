@@ -4,7 +4,7 @@
 
 A Hacker News-style platform for discovering and discussing research papers from arXiv.
 
-![GitHub stars](https://img.shields.io/github/stars/peterdunson/arxiv-news?style=social)
+![Hits](https://hits.sh/github.com/peterdunson/arxiv-news.svg)
 
 **🌐 Live:** [arxiv-news.com](https://arxiv-news.com)
 
