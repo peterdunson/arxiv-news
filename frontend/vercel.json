@@ -8,6 +8,10 @@
     {
       "source": "/sitemap.xml",
       "destination": "https://arxiv-news-api-production.up.railway.app/sitemap.xml"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
