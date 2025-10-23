@@ -187,7 +187,7 @@ export default function PaperDetail() {
 
   // Recursive function to render comment and its replies
   const renderComment = (comment, depth = 0, threadNumber = '', parentUsername = null) => {
-    return (
+    const commentRow = (
       <tr key={comment.id} className="athing comtr">
         <td style={{ verticalAlign: 'top', paddingLeft: '10px' }}>
           <div style={{ textAlign: 'center', paddingTop: '4px' }}>
@@ -285,19 +285,21 @@ export default function PaperDetail() {
                   )}
                 </td>
               </tr>
-
-              {/* Recursively render replies */}
-              {comment.replies && comment.replies.length > 0 && (
-                comment.replies.map((reply, index) => {
-                  const replyThreadNumber = threadNumber ? `${threadNumber}.${index + 1}` : `${index + 1}`;
-                  return renderComment(reply, depth + 1, replyThreadNumber, comment.username);
-                })
-              )}
             </tbody>
           </table>
         </td>
       </tr>
     );
+
+    // Render replies as siblings, not nested
+    const replyRows = comment.replies && comment.replies.length > 0
+      ? comment.replies.flatMap((reply, index) => {
+          const replyThreadNumber = threadNumber ? `${threadNumber}.${index + 1}` : `${index + 1}`;
+          return renderComment(reply, depth + 1, replyThreadNumber, comment.username);
+        })
+      : [];
+
+    return [commentRow, ...replyRows];
   };
 
   if (loading) {
