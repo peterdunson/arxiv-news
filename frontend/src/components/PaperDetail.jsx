@@ -252,17 +252,7 @@ export default function PaperDetail() {
 
               {/* Recursively render replies */}
               {comment.replies && comment.replies.length > 0 && (
-                comment.replies.map(reply => (
-                  <tr key={reply.id}>
-                    <td colSpan={2} style={{ padding: 0 }}>
-                      <table style={{ border: '0', width: '100%' }}>
-                        <tbody>
-                          {renderComment(reply, depth + 1)}
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-                ))
+                comment.replies.map(reply => renderComment(reply, depth + 1))
               )}
             </tbody>
           </table>
