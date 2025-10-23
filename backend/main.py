@@ -568,6 +568,11 @@ def get_comments(
         # Get replies
         replies = db.query(Comment).filter(Comment.parent_id == comment.id).order_by(Comment.created_at.asc()).all()
 
+        # Debug logging
+        print(f"Comment {comment.id}: Found {len(replies)} replies")
+        if len(replies) > 0:
+            print(f"  Reply IDs: {[r.id for r in replies]}")
+
         return {
             "id": comment.id,
             "user_id": comment.user_id,
