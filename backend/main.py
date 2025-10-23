@@ -159,9 +159,13 @@ class CommentResponse(BaseModel):
     vote_count: int
     created_at: str
     user_voted: bool = False
+    replies: List['CommentResponse'] = []
 
     class Config:
         from_attributes = True
+
+# Enable forward reference for recursive model
+CommentResponse.model_rebuild()
 
 class UserCreate(BaseModel):
     username: str
