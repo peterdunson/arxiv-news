@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from typing import List, Optional
 import json
 from jose import JWTError, jwt
@@ -444,8 +445,8 @@ def get_papers(
         .limit(15000)
         .subquery()
     )
-    
-    query = db.query(Paper).filter(Paper.id.in_(recent_papers_subquery))
+
+    query = db.query(Paper).filter(Paper.id.in_(select(recent_papers_subquery.c.id)))
     
     if sort == "votes":
         query = query.order_by(Paper.vote_count.desc())
