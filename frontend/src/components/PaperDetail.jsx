@@ -187,9 +187,10 @@ export default function PaperDetail() {
 
   // Recursive function to render comment and its replies
   const renderComment = (comment, depth = 0, threadNumber = '', parentUsername = null) => {
+    const indentSize = depth * 10; // 40px indent per level
     const commentRow = (
       <tr key={comment.id} className="athing comtr">
-        <td style={{ verticalAlign: 'top', paddingLeft: '10px' }}>
+        <td style={{ verticalAlign: 'top', paddingLeft: `${10 + indentSize}px` }}>
           <div style={{ textAlign: 'center', paddingTop: '4px' }}>
             <a
               onClick={() => handleVoteComment(comment.id)}
