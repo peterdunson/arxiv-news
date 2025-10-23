@@ -186,12 +186,10 @@ export default function PaperDetail() {
   };
 
   // Recursive function to render comment and its replies
-  const renderComment = (comment, depth = 0) => {
-    const indentWidth = depth * 10; // Small indent per level
-
+  const renderComment = (comment, depth = 0, threadNumber = '', parentUsername = null) => {
     return (
-      <tr key={comment.id} className="athing comtr" style={depth > 0 ? { marginLeft: '-30px' } : {}}>
-        <td style={{ verticalAlign: 'top', paddingLeft: depth > 0 ? '0px' : '10px' }}>
+      <tr key={comment.id} className="athing comtr">
+        <td style={{ verticalAlign: 'top', paddingLeft: '10px' }}>
           <div style={{ textAlign: 'center', paddingTop: '4px' }}>
             <a
               onClick={() => handleVoteComment(comment.id)}
@@ -206,8 +204,11 @@ export default function PaperDetail() {
             <tbody>
               <tr>
                 <td className="default">
-                  <div style={{ marginTop: '2px', marginBottom: '-10px', marginLeft: `${indentWidth}px` }}>
+                  <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
+                      {parentUsername && (
+                        <span style={{ color: '#828282' }}>re: {parentUsername} #{threadNumber} | </span>
+                      )}
                       <a
                         onClick={() => navigate(`/user/${comment.username}`)}
                         className="hnuser"
@@ -224,7 +225,7 @@ export default function PaperDetail() {
                     </span>
                   </div>
                   <br />
-                  <div className="comment" style={{ marginLeft: `${indentWidth}px` }}>
+                  <div className="comment">
                     <span className="c00">{comment.content}</span>
                     <p>
                       <a
@@ -250,7 +251,7 @@ export default function PaperDetail() {
 
                   {/* Reply form */}
                   {replyTo === comment.id && (
-                    <div style={{ marginLeft: `${indentWidth}px`, marginTop: '10px' }}>
+                    <div style={{ marginTop: '10px' }}>
                       <form onSubmit={(e) => handleReply(e, comment.id)}>
                         <textarea
                           value={replyText}
@@ -285,7 +286,10 @@ export default function PaperDetail() {
 
               {/* Recursively render replies */}
               {comment.replies && comment.replies.length > 0 && (
-                comment.replies.map(reply => renderComment(reply, depth + 1))
+                comment.replies.map((reply, index) => {
+                  const replyThreadNumber = threadNumber ? `${threadNumber}.${index + 1}` : `${index + 1}`;
+                  return renderComment(reply, depth + 1, replyThreadNumber, comment.username);
+                })
               )}
             </tbody>
           </table>
@@ -469,7 +473,7 @@ export default function PaperDetail() {
             </tr>
 
             {/* Comments */}
-            {comments.map((comment) => renderComment(comment))}
+            {comments.map((comment, index) => renderComment(comment, 0, `${index + 1}`, null))}
           </tbody>
         </table>
       </td>
