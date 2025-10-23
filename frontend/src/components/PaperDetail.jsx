@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { getPaper, getComments, addComment, votePaper, voteComment } from '../api';
 
 export default function PaperDetail() {
@@ -291,13 +292,68 @@ export default function PaperDetail() {
     );
   }
 
+  // Generate page title and description for SEO
+  const pageTitle = `${paper.title} | arXiv News`;
+  const pageDescription = paper.summary
+    ? paper.summary.substring(0, 155) + '...'
+    : `Discuss ${paper.title} on arXiv News. Read the paper, upvote, and join the discussion.`;
+  const pageUrl = `https://arxiv-news.com/paper/${arxivId}`;
+  const keywords = `${paper.title}, arxiv, ${paper.category || 'research'}, paper discussion, ${arxivId}, comments, arXiv News`;
+
   return (
-    <tr>
-      <td style={{ padding: '0px' }}>
-        <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px' }} className="itemlist">
-          <tbody>
-            {/* Paper Item */}
-            <tr className="athing">
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{pageTitle}</title>
+        <meta name="title" content={pageTitle} />
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={keywords} />
+        <link rel="canonical" href={pageUrl} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:site_name" content="arXiv News" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={pageUrl} />
+        <meta property="twitter:title" content={pageTitle} />
+        <meta property="twitter:description" content={pageDescription} />
+
+        {/* Structured Data (JSON-LD) for Rich Snippets */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "DiscussionForumPosting",
+            "headline": paper.title,
+            "description": pageDescription,
+            "url": pageUrl,
+            "discussionUrl": pageUrl,
+            "commentCount": comments.length,
+            "interactionStatistic": {
+              "@type": "InteractionCounter",
+              "interactionType": "https://schema.org/CommentAction",
+              "userInteractionCount": comments.length
+            },
+            "about": {
+              "@type": "ScholarlyArticle",
+              "name": paper.title,
+              "url": paper.arxiv_url,
+              "identifier": arxivId
+            }
+          })}
+        </script>
+      </Helmet>
+
+      <tr>
+        <td style={{ padding: '0px' }}>
+          <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px' }} className="itemlist">
+            <tbody>
+              {/* Paper Item */}
+              <tr className="athing">
               <td style={{ verticalAlign: 'top' }} className="votelinks">
                 <div style={{ textAlign: 'center', padding: '0 10px' }}>
                   <a
@@ -395,5 +451,6 @@ export default function PaperDetail() {
         </table>
       </td>
     </tr>
+    </>
   );
 }
