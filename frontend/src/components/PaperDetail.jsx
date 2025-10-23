@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { getPaper, getComments, addComment, votePaper, voteComment } from '../api';
+import { getPaper, getComments, addComment, votePaper, voteComment, deleteComment } from '../api';
 
 export default function PaperDetail() {
   const { arxivId } = useParams();
@@ -145,6 +145,28 @@ export default function PaperDetail() {
     setCommentLoading(false);
   };
 
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+
+    try {
+      await deleteComment(commentId);
+      await loadComments();
+      await loadPaper();
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      if (error.response?.status === 403) {
+        alert('You can only delete your own comments');
+      } else if (error.response?.status === 401) {
+        alert('Please login to delete comments');
+        navigate('/login');
+      } else {
+        alert('Failed to delete comment. Please try again.');
+      }
+    }
+  };
+
   const formatTimeAgo = (dateStr) => {
     const now = new Date();
     const published = new Date(dateStr);
@@ -211,6 +233,18 @@ export default function PaperDetail() {
                       >
                         reply
                       </a>
+                      {localStorage.getItem('currentUser') &&
+                       comment.username === JSON.parse(localStorage.getItem('currentUser')).username && (
+                        <>
+                          {' | '}
+                          <a
+                            onClick={() => handleDeleteComment(comment.id)}
+                            style={{ cursor: 'pointer', fontSize: '10px', textDecoration: 'underline' }}
+                          >
+                            delete
+                          </a>
+                        </>
+                      )}
                     </p>
                   </div>
 

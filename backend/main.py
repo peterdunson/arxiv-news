@@ -656,6 +656,32 @@ def vote_comment(
     db.commit()
     return {"vote_count": comment.vote_count, "user_voted": not existing_vote}
 
+@app.delete("/comments/{comment_id}")
+def delete_comment(
+    comment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a comment (only by the comment author)"""
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    # Only allow the comment author to delete
+    if comment.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only delete your own comments")
+
+    # Get the paper to update comment count
+    paper = db.query(Paper).filter(Paper.id == comment.paper_id).first()
+    if paper:
+        paper.comment_count -= 1
+
+    # Delete the comment
+    db.delete(comment)
+    db.commit()
+
+    return {"message": "Comment deleted successfully"}
+
 
 # Post (Show AN) endpoints
 class PostCreate(BaseModel):

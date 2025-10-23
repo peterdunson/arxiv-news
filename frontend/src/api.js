@@ -108,6 +108,14 @@ export const voteComment = async (commentId) => {
   return response.data;
 };
 
+export const deleteComment = async (commentId) => {
+  const response = await axios.delete(
+    `${API_BASE}/comments/${commentId}`,
+    { headers: getAuthHeader() }
+  );
+  return response.data;
+};
+
 // Post (Show AN) functions
 export const getPosts = async (sort = 'hot', limit = 30) => {
   const response = await axios.get(`${API_BASE}/posts`, {
