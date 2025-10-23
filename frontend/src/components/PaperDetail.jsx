@@ -165,12 +165,11 @@ export default function PaperDetail() {
 
   // Recursive function to render comment and its replies
   const renderComment = (comment, depth = 0) => {
-    const indentWidth = depth * 10; // 10px per nesting level, very subtle indent
-    console.log(`Rendering comment ${comment.id} at depth ${depth}, indentWidth: ${indentWidth}px`);
+    const indentWidth = depth * 10; // Small indent per level
 
     return (
-      <tr key={comment.id} className="athing comtr">
-        <td style={{ verticalAlign: 'top' }}>
+      <tr key={comment.id} className="athing comtr" style={depth > 0 ? { marginLeft: '-30px' } : {}}>
+        <td style={{ verticalAlign: 'top', paddingLeft: depth > 0 ? '0px' : '10px' }}>
           <div style={{ textAlign: 'center', paddingTop: '4px' }}>
             <a
               onClick={() => handleVoteComment(comment.id)}
