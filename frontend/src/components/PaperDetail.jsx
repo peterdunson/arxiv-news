@@ -199,11 +199,11 @@ export default function PaperDetail() {
             </a>
           </div>
         </td>
-        <td style={{ padding: '0' }}>
-          <table style={{ border: '0', borderCollapse: 'collapse', borderSpacing: '0', width: '100%' }}>
+        <td>
+          <table style={{ border: '0' }}>
             <tbody>
               <tr>
-                <td className="default" style={{ padding: '0' }}>
+                <td className="default">
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
                       <span style={{ color: '#828282' }}>
