@@ -173,10 +173,9 @@ export default function PaperDetail() {
           <div style={{ textAlign: 'center', paddingTop: '4px' }}>
             <a
               onClick={() => handleVoteComment(comment.id)}
-              className={comment.user_voted ? 'nosee' : ''}
               style={{ cursor: 'pointer' }}
             >
-              <div className="votearrow" title="upvote" />
+              <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} title={comment.user_voted ? 'unvote' : 'upvote'} />
             </a>
           </div>
         </td>
