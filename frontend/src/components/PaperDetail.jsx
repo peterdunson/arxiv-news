@@ -165,7 +165,7 @@ export default function PaperDetail() {
 
   // Recursive function to render comment and its replies
   const renderComment = (comment, depth = 0) => {
-    const indentWidth = depth * 40; // 40px per nesting level, like HN
+    const indentWidth = depth * 20; // 20px per nesting level, subtle indent
 
     return (
       <tr key={comment.id} className="athing comtr">
