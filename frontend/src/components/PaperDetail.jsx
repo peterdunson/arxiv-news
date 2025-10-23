@@ -199,16 +199,18 @@ export default function PaperDetail() {
             </a>
           </div>
         </td>
-        <td>
-          <table style={{ border: '0' }}>
+        <td style={{ padding: '0' }}>
+          <table style={{ border: '0', borderCollapse: 'collapse', borderSpacing: '0', width: '100%' }}>
             <tbody>
               <tr>
-                <td className="default">
+                <td className="default" style={{ padding: '0' }}>
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
-                      {parentUsername && (
-                        <span style={{ color: '#828282' }}>re: {parentUsername} #{threadNumber} | </span>
-                      )}
+                      <span style={{ color: '#828282' }}>
+                        #{threadNumber}
+                        {parentUsername && ` re: ${parentUsername}`}
+                        {' | '}
+                      </span>
                       <a
                         onClick={() => navigate(`/user/${comment.username}`)}
                         className="hnuser"
