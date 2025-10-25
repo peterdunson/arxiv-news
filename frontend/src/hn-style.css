@@ -1,5 +1,5 @@
 .admin   { font-family:Verdana, Geneva, sans-serif; font-size:8.5pt; color:#000000; }
-.title   { font-family:Verdana, Geneva, sans-serif; font-size: 10pt; color:#828282; }
+.title   { font-family:Verdana, Geneva, sans-serif; font-size: 10pt; color:#000000; }
 .subtext { font-family:Verdana, Geneva, sans-serif; font-size:  7pt; color:#828282; }
 .yclinks { font-family:Verdana, Geneva, sans-serif; font-size:  8pt; color:#828282; }
 .pagetop { font-family:Verdana, Geneva, sans-serif; font-size: 10pt; color:#222222; }
@@ -7,6 +7,8 @@
 .comment { font-family:Verdana, Geneva, sans-serif; font-size:  9pt; }
 .hnname  { margin-right: 5px; }
 
+a:link { text-decoration: none; color: #000000; }
+a:visited { text-decoration: none; color: #828282; }
 .comment a:link, .comment a:visited { text-decoration: underline; }
 .noshow { display: none; }
 
