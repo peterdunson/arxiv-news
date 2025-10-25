@@ -192,7 +192,7 @@ export default function PaperDetail() {
     const commentRow = (
       <tr key={comment.id} className="athing comtr">
         <td>
-          <table style={{ border: '0', width: '100%', borderCollapse: 'collapse', borderSpacing: '0' }}>
+          <table style={{ border: '0' }}>
             <tbody>
               <tr>
                 {/* Spacer column for indentation */}
@@ -202,7 +202,6 @@ export default function PaperDetail() {
                     src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                     height="1"
                     width={indentWidth}
-                    style={{ display: 'block' }}
                   />
                 </td>
                 {/* Vote column */}
@@ -218,7 +217,7 @@ export default function PaperDetail() {
                   </div>
                 </td>
                 {/* Main comment content */}
-                <td style={{ verticalAlign: 'top' }} className="default">
+                <td className="default">
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
                       <span style={{ color: '#828282' }}>
@@ -243,32 +242,36 @@ export default function PaperDetail() {
                   </div>
                   <br />
                   <div className="comment">
-                    <span className="c00">{comment.content}</span>
+                    <span className="c00">
+                      <span>{comment.content}</span>
+                      <div className="reply">
+                        <p style={{ fontSize: '1' }}>
+                          <u>
+                            <a
+                              onClick={() => setReplyTo(comment.id)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              reply
+                            </a>
+                          </u>
+                          {localStorage.getItem('currentUser') &&
+                           comment.username === JSON.parse(localStorage.getItem('currentUser')).username && (
+                            <>
+                              {' | '}
+                              <u>
+                                <a
+                                  onClick={() => handleDeleteComment(comment.id)}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  delete
+                                </a>
+                              </u>
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </span>
                   </div>
-                  <p style={{ fontSize: '8pt', margin: '8px 0 0 0' }}>
-                    <u>
-                      <a
-                        onClick={() => setReplyTo(comment.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        reply
-                      </a>
-                    </u>
-                    {localStorage.getItem('currentUser') &&
-                     comment.username === JSON.parse(localStorage.getItem('currentUser')).username && (
-                      <>
-                        {' | '}
-                        <u>
-                          <a
-                            onClick={() => handleDeleteComment(comment.id)}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            delete
-                          </a>
-                        </u>
-                      </>
-                    )}
-                  </p>
 
                   {/* Reply form */}
                   {replyTo === comment.id && (
@@ -281,14 +284,15 @@ export default function PaperDetail() {
                           rows="4"
                           cols="60"
                           required
-                          style={{ marginBottom: '8px', fontFamily: 'monospace', fontSize: '10pt' }}
+                          style={{ marginBottom: '8px' }}
                         />
+                        <br />
                         <br />
                         <input
                           type="submit"
                           value={commentLoading ? 'Replying...' : 'reply'}
                           disabled={commentLoading}
-                          style={{ cursor: 'pointer', marginRight: '5px', fontFamily: 'monospace', fontSize: '10pt' }}
+                          style={{ cursor: 'pointer', marginRight: '5px' }}
                         />
                         <input
                           type="button"
@@ -297,7 +301,7 @@ export default function PaperDetail() {
                             setReplyTo(null);
                             setReplyText('');
                           }}
-                          style={{ cursor: 'pointer', fontFamily: 'monospace', fontSize: '10pt' }}
+                          style={{ cursor: 'pointer' }}
                         />
                       </form>
                     </div>
