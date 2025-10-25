@@ -24,4 +24,23 @@ a:visited { text-decoration: none; color: #828282; }
   margin: 0;
 }
 
+.votearrow {
+  width:      10px;
+  height:     10px;
+  border:     0px;
+  margin:     3px 2px 6px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpolygon points='0,10 5,0 10,10' fill='%23828282'/%3E%3C/svg%3E")
+  no-repeat;
+  cursor: pointer;
+}
+
+.votearrow:hover {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpolygon points='0,10 5,0 10,10' fill='%23ff6600'/%3E%3C/svg%3E")
+  no-repeat;
+}
+
+.rotate180 {
+  transform: rotate(180deg);
+}
+
 

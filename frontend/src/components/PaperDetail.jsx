@@ -403,8 +403,8 @@ export default function PaperDetail() {
       </Helmet>
 
       <tr>
-        <td style={{ padding: '0px', width: '100%' }}>
-          <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px', width: '100%' }} className="itemlist">
+        <td style={{ padding: '0px' }}>
+          <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px' }} className="itemlist">
             <tbody>
               {/* Paper Item */}
               <tr className="athing">
@@ -506,10 +506,8 @@ export default function PaperDetail() {
 
     {/* Comments Section - Outside main table for full width */}
     <tr>
-      <td style={{ padding: '0px', verticalAlign: 'top' }} className="votelinks">
-      </td>
       <td style={{ padding: '0px' }}>
-        <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px', width: '100%' }} className="itemlist">
+        <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px' }} className="itemlist">
           <tbody>
             {comments.map((comment, index) => renderComment(comment, 0, `${index + 1}`, null))}
           </tbody>
