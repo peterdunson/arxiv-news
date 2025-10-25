@@ -191,8 +191,8 @@ export default function PaperDetail() {
 
     const commentRow = (
       <tr key={comment.id} className="athing comtr">
-        <td>
-          <table style={{ border: '0', width: '100%', borderCollapse: 'collapse' }}>
+        <td style={{ width: '100%' }}>
+          <table style={{ border: '0', width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <tbody>
               <tr>
                 {/* Spacer column for indentation */}
@@ -499,7 +499,16 @@ export default function PaperDetail() {
               </td>
             </tr>
 
-            {/* Comments */}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+
+    {/* Comments Section - Outside main table for full width */}
+    <tr>
+      <td style={{ padding: '0px' }}>
+        <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px', width: '100%' }} className="itemlist">
+          <tbody>
             {comments.map((comment, index) => renderComment(comment, 0, `${index + 1}`, null))}
           </tbody>
         </table>
