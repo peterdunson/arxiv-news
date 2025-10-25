@@ -13,23 +13,3 @@ a:visited { text-decoration: none; color: #828282; }
 .noshow { display: none; }
 
 
-@media only screen and (min-width : 810px) and (max-width : 899px) {
-  .comment { max-width: 730px; overflow: auto }
-  pre { max-width: 540px; }
-}
-@media only screen and (min-width : 900px) and (max-width : 1079px) {
-  .comment { max-width: 810px; overflow: auto }
-  pre { max-width: 600px; }
-}
-@media only screen and (min-width : 1080px) and (max-width : 1169px) {
-  .comment { max-width: 970px; overflow: auto }
-  pre { max-width: 720px; }
-}
-@media only screen and (min-width : 1170px) and (max-width : 1259px) {
-  .comment { max-width: 1050px; overflow: auto }
-  pre { max-width: 780px; }
-}
-@media only screen and (min-width : 1260px) and (max-width : 1349px) {
-  .comment { max-width: 1130px; overflow: auto }
-  pre { max-width: 840px; }
-}
