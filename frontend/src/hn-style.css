@@ -12,4 +12,16 @@ a:visited { text-decoration: none; color: #828282; }
 .comment a:link, .comment a:visited { text-decoration: underline; }
 .noshow { display: none; }
 
+.votelinks {
+  width: 30px;
+  min-width: 30px;
+  padding: 0;
+  margin: 0;
+}
+
+.ind {
+  padding: 0;
+  margin: 0;
+}
+
 

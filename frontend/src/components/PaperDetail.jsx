@@ -191,8 +191,8 @@ export default function PaperDetail() {
 
     const commentRow = (
       <tr key={comment.id} className="athing comtr">
-        <td style={{ width: '100%' }}>
-          <table style={{ border: '0', width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <td style={{ width: '100%', padding: '0' }}>
+          <table style={{ border: '0', width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
               <tr>
                 {/* Spacer column for indentation */}
@@ -409,7 +409,7 @@ export default function PaperDetail() {
               {/* Paper Item */}
               <tr className="athing">
               <td style={{ verticalAlign: 'top' }} className="votelinks">
-                <div style={{ textAlign: 'center', padding: '0 10px' }}>
+                <div style={{ textAlign: 'center' }}>
                   <a
                     onClick={handleVotePaper}
                     style={{ cursor: 'pointer' }}
@@ -464,7 +464,7 @@ export default function PaperDetail() {
             <tr>
               <td colSpan={1} />
               <td>
-                <div style={{ marginBottom: '10px', fontSize: '11pt' }}>
+                <div style={{ marginBottom: '10px', fontSize: '11pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                   <p style={{ marginBottom: '10px' }}><b>Abstract:</b></p>
                   <p>{paper.abstract}</p>
                 </div>
@@ -506,6 +506,8 @@ export default function PaperDetail() {
 
     {/* Comments Section - Outside main table for full width */}
     <tr>
+      <td style={{ padding: '0px', verticalAlign: 'top' }} className="votelinks">
+      </td>
       <td style={{ padding: '0px' }}>
         <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px', width: '100%' }} className="itemlist">
           <tbody>
