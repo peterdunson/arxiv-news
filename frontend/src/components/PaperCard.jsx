@@ -76,7 +76,7 @@ export default function PaperCard({ paper, rank }) {
     <>
       {/* Title Row */}
       <tr className="athing">
-        <td style={{ textAlign: 'right', verticalAlign: 'top', paddingRight: '8px', paddingLeft: '5px' }} className="title">
+        <td style={{ textAlign: 'right', verticalAlign: 'top', paddingRight: '8px', paddingLeft: '5px', color: '#828282' }} className="title">
           <span className="rank">{rank}.</span>
         </td>
         <td style={{ verticalAlign: 'top', paddingRight: '8px', paddingLeft: '5px' }} className="votelinks">
@@ -87,7 +87,7 @@ export default function PaperCard({ paper, rank }) {
             <div className={voted ? 'votearrow rotate180' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
           </a>
         </td>
-        <td className="title" style={{ paddingLeft: '0px' }}>
+        <td className="title">
           <a
             className="storylink"
             onClick={() => navigate(`/paper/${paper.arxiv_id}`)}
