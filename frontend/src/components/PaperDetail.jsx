@@ -443,11 +443,11 @@ export default function PaperDetail() {
                 {' '}
                 <span className="age">{formatTimeAgo(paper.published)}</span>
                 {' | '}
-                <a onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>back</a>
+                <a onClick={() => navigate('/')} style={{ cursor: 'pointer', color: '#828282' }}>back</a>
                 {' | '}
-                <a href={paper.pdf_url} target="_blank" rel="noopener noreferrer">pdf</a>
+                <a href={paper.pdf_url} target="_blank" rel="noopener noreferrer" style={{ color: '#828282' }}>pdf</a>
                 {' | '}
-                <a href={paper.arxiv_url} target="_blank" rel="noopener noreferrer">arxiv</a>
+                <a href={paper.arxiv_url} target="_blank" rel="noopener noreferrer" style={{ color: '#828282' }}>arxiv</a>
                 {' | '}
                 {paper.comment_count === 0
                   ? 'discuss'
@@ -464,7 +464,7 @@ export default function PaperDetail() {
             <tr>
               <td colSpan={1} />
               <td>
-                <div style={{ marginBottom: '10px', fontSize: '11pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                <div style={{ marginBottom: '10px', fontSize: '10pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                   <p style={{ marginBottom: '10px' }}><b>Abstract:</b></p>
                   <p>{paper.abstract}</p>
                 </div>
