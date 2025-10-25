@@ -31,6 +31,40 @@ a:visited { color:#828282; text-decoration:none; }
 
 .default p { margin-top: 8px; margin-bottom: 0px; }
 
+/* Comment indentation and spacing */
+.ind {
+  padding: 0;
+  margin: 0;
+}
+
+.ind img {
+  display: block;
+}
+
+.votelinks {
+  padding: 0 5px 0 0;
+  margin: 0;
+  width: 20px;
+  min-width: 20px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.comtr {
+  background-color: #f6f6ef;
+}
+
+/* Spacing for nested replies */
+.comtr + .comtr {
+  margin-top: 0;
+}
+
+/* Comment row spacing */
+.comtr td {
+  padding: 0;
+  margin: 0;
+}
+
 pre { overflow: auto; padding: 2px; }
 pre:hover { overflow:auto }
 
