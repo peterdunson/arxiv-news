@@ -192,7 +192,7 @@ export default function PaperDetail() {
     const commentRow = (
       <tr key={comment.id} className="athing comtr">
         <td>
-          <table style={{ border: '0' }}>
+          <table style={{ border: '0', width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
               <tr>
                 {/* Spacer column for indentation */}
@@ -217,7 +217,7 @@ export default function PaperDetail() {
                   </div>
                 </td>
                 {/* Main comment content */}
-                <td className="default">
+                <td className="default" style={{ width: '100%' }}>
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
                       <span style={{ color: '#828282' }}>
