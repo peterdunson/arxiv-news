@@ -76,18 +76,16 @@ export default function PaperCard({ paper, rank }) {
     <>
       {/* Title Row */}
       <tr className="athing">
-        <td style={{ textAlign: 'right', verticalAlign: 'top' }} className="title">
+        <td style={{ textAlign: 'right', verticalAlign: 'top', paddingRight: '5px' }} className="title">
           <span className="rank">{rank}.</span>
         </td>
-        <td style={{ verticalAlign: 'top' }} className="votelinks">
-          <div style={{ textAlign: 'center' }}>
-            <a
-              onClick={handleVote}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className={voted ? 'votearrow rotate180' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
-            </a>
-          </div>
+        <td style={{ verticalAlign: 'top', paddingRight: '5px' }} className="votelinks">
+          <a
+            onClick={handleVote}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className={voted ? 'votearrow rotate180' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
+          </a>
         </td>
         <td className="title">
           <a
