@@ -221,7 +221,7 @@ export default function PaperDetail() {
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
                       <span style={{ color: '#828282' }}>
-                        #{threadNumber}
+                        {threadNumber}
                         {parentUsername && ` re: ${parentUsername}`}
                         {' | '}
                       </span>
