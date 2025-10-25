@@ -191,7 +191,7 @@ export default function PaperDetail() {
 
     const commentRow = (
       <tr key={comment.id} className="athing comtr">
-        <td style={{ width: '100%', padding: '0' }}>
+        <td style={{ padding: '0' }}>
           <table style={{ border: '0', width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
               <tr>
@@ -403,8 +403,8 @@ export default function PaperDetail() {
       </Helmet>
 
       <tr>
-        <td style={{ padding: '0px' }}>
-          <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px' }} className="itemlist">
+        <td style={{ padding: '0px', width: '100%' }}>
+          <table style={{ border: '0px', padding: '0px', borderCollapse: 'collapse', borderSpacing: '0px', width: '100%' }} className="itemlist">
             <tbody>
               {/* Paper Item */}
               <tr className="athing">
