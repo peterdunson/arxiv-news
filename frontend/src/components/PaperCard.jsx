@@ -79,7 +79,7 @@ export default function PaperCard({ paper, rank }) {
         <td style={{ textAlign: 'right', verticalAlign: 'top', paddingRight: '8px', paddingLeft: '5px', color: '#828282' }} className="title">
           <span className="rank">{rank}.</span>
         </td>
-        <td style={{ verticalAlign: 'top', paddingRight: '8px', paddingLeft: '5px' }} className="votelinks">
+        <td style={{ verticalAlign: 'top', paddingRight: '3px', paddingLeft: '5px' }} className="votelinks">
           <a
             onClick={handleVote}
             style={{ cursor: 'pointer' }}
