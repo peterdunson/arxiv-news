@@ -464,7 +464,7 @@ export default function PaperDetail() {
             <tr>
               <td colSpan={1} />
               <td>
-                <div style={{ marginBottom: '10px', fontSize: '9pt' }}>
+                <div style={{ marginBottom: '10px', fontSize: '11pt' }}>
                   <p style={{ marginBottom: '10px' }}><b>Abstract:</b></p>
                   <p>{paper.abstract}</p>
                 </div>

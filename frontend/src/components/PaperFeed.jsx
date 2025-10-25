@@ -135,7 +135,7 @@ export default function PaperFeed() {
   if (loading) {
     return (
       <tr>
-        <td style={{ padding: '20px', textAlign: 'center' }}>
+        <td style={{ padding: '20px', textAlign: 'center', fontFamily: 'Verdana, Geneva, sans-serif', fontSize: '10pt' }}>
           Loading papers...
         </td>
       </tr>
@@ -170,7 +170,7 @@ export default function PaperFeed() {
           <tbody>
             {/* Filter indicator */}
             <tr>
-              <td colSpan={3} style={{ padding: '10px 0', fontSize: '11pt' }}>
+              <td colSpan={3} style={{ padding: '10px 0', fontSize: '10pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                 <span style={{ color: '#828282' }}>
                   Showing: <b style={{ color: '#000000' }}>{getSortName(sortBy)}</b>
                   {category !== 'all' && (
