@@ -87,7 +87,7 @@ export default function PaperCard({ paper, rank }) {
             <div className={voted ? 'votearrow rotate180' : 'votearrow'} title={voted ? 'unvote' : 'upvote'} />
           </a>
         </td>
-        <td className="title">
+        <td className="title" style={{ paddingLeft: '0px' }}>
           <a
             className="storylink"
             onClick={() => navigate(`/paper/${paper.arxiv_id}`)}
