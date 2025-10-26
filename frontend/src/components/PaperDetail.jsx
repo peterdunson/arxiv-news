@@ -215,7 +215,7 @@ export default function PaperDetail() {
                         style={{ cursor: 'pointer', marginRight: '2px', verticalAlign: 'middle' }}
                         title={comment.user_voted ? 'unvote' : 'upvote'}
                       >
-                        <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} style={{ width: '8px', height: '8px', margin: '2px 0 4px', display: 'inline-block' }} />
+                        <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} style={{ width: '7px', height: '7px', margin: '2px 0 4px', display: 'inline-block' }} />
                       </a>
                       <span style={{ color: '#828282' }}>
                         {threadNumber}
