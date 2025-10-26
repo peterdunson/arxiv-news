@@ -98,15 +98,13 @@ export default function PaperCard({ paper, rank }) {
             style={{ cursor: 'pointer' }}
           >
             {paper.title}
-          </a>
-          <span className="sitebit comhead">
-            {' '}
-            (
-            <a href={paper.arxiv_url} target="_blank" rel="noopener noreferrer">
+            <span className="sitebit comhead">
+              {' '}
+              (
               <span className="sitestr">{getHostname(paper.arxiv_url)}</span>
-            </a>
-            )
-          </span>
+              )
+            </span>
+          </a>
         </td>
       </tr>
 
