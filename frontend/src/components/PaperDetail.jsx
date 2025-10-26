@@ -210,13 +210,6 @@ export default function PaperDetail() {
                 <td className="default" style={{ width: '100%' }}>
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
-                      <a
-                        onClick={() => handleVoteComment(comment.id)}
-                        style={{ cursor: 'pointer', marginRight: '6px', verticalAlign: 'middle' }}
-                        title={comment.user_voted ? 'unvote' : 'upvote'}
-                      >
-                        <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} style={{ width: '7px', height: '7px', margin: '2px 0 4px', display: 'inline-block' }} />
-                      </a>
                       <span style={{ color: '#828282' }}>
                         {threadNumber}
                         {parentUsername && ` re: ${parentUsername}`}
@@ -233,6 +226,13 @@ export default function PaperDetail() {
                         {' '}
                         {formatTimeAgo(comment.created_at)}
                       </span>
+                      {' | '}
+                      <a
+                        onClick={() => handleVoteComment(comment.id)}
+                        style={{ cursor: 'pointer', color: '#828282' }}
+                      >
+                        {comment.user_voted ? 'unvote' : 'upvote'}
+                      </a>
                       {' | '}
                       <span className="score">{comment.vote_count} points</span>
                     </span>
