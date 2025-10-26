@@ -210,7 +210,7 @@ export default function PaperDetail() {
                     <span className="comhead">
                       <a
                         onClick={() => handleVoteComment(comment.id)}
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', marginRight: '3px' }}
                         title={comment.user_voted ? 'unvote' : 'upvote'}
                       >
                         <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} style={{ display: 'inline-block' }} />
