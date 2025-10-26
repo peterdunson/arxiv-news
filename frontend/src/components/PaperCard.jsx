@@ -90,7 +90,11 @@ export default function PaperCard({ paper, rank }) {
         <td className="title" style={{ paddingLeft: '0px' }}>
           <a
             className="storylink"
-            onClick={() => navigate(`/paper/${paper.arxiv_id}`)}
+            href={`/paper/${paper.arxiv_id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/paper/${paper.arxiv_id}`);
+            }}
             style={{ cursor: 'pointer' }}
           >
             {paper.title}
