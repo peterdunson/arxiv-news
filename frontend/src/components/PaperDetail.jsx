@@ -204,20 +204,17 @@ export default function PaperDetail() {
                     width={indentWidth}
                   />
                 </td>
-                {/* Vote column */}
-                <td style={{ verticalAlign: 'top', paddingRight: '0px' }} className="votelinks">
-                  <a
-                    onClick={() => handleVoteComment(comment.id)}
-                    style={{ cursor: 'pointer' }}
-                    title={comment.user_voted ? 'unvote' : 'upvote'}
-                  >
-                    <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} />
-                  </a>
-                </td>
                 {/* Main comment content */}
                 <td className="default" style={{ width: '100%' }}>
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
                     <span className="comhead">
+                      <a
+                        onClick={() => handleVoteComment(comment.id)}
+                        style={{ cursor: 'pointer', marginRight: '2px', verticalAlign: 'middle' }}
+                        title={comment.user_voted ? 'unvote' : 'upvote'}
+                      >
+                        <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} style={{ width: '8px', height: '8px', margin: '2px 0 4px', display: 'inline-block' }} />
+                      </a>
                       <span style={{ color: '#828282' }}>
                         {threadNumber}
                         {parentUsername && ` re: ${parentUsername}`}
