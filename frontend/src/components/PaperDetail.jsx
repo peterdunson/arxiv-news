@@ -204,6 +204,8 @@ export default function PaperDetail() {
                     width={indentWidth}
                   />
                 </td>
+                {/* Vote column spacer to align with abstract */}
+                <td style={{ verticalAlign: 'top' }} className="votelinks"></td>
                 {/* Main comment content */}
                 <td className="default" style={{ width: '100%' }}>
                   <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
