@@ -212,13 +212,12 @@ export default function PaperDetail() {
                     <span className="comhead">
                       <a
                         onClick={() => handleVoteComment(comment.id)}
-                        style={{ cursor: 'pointer', marginRight: '3px', verticalAlign: 'middle' }}
+                        style={{ cursor: 'pointer', marginRight: '6px', verticalAlign: 'middle' }}
                         title={comment.user_voted ? 'unvote' : 'upvote'}
                       >
                         <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} style={{ width: '7px', height: '7px', margin: '2px 0 4px', display: 'inline-block' }} />
                       </a>
                       <span style={{ color: '#828282' }}>
-                        {' | '}
                         {threadNumber}
                         {parentUsername && ` re: ${parentUsername}`}
                         {' | '}
