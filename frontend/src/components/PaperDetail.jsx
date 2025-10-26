@@ -205,16 +205,14 @@ export default function PaperDetail() {
                   />
                 </td>
                 {/* Vote column */}
-                <td style={{ verticalAlign: 'top' }} className="votelinks">
-                  <div style={{ textAlign: 'center' }}>
-                    <a
-                      onClick={() => handleVoteComment(comment.id)}
-                      style={{ cursor: 'pointer' }}
-                      title={comment.user_voted ? 'unvote' : 'upvote'}
-                    >
-                      <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} />
-                    </a>
-                  </div>
+                <td style={{ verticalAlign: 'middle', paddingRight: '3px' }} className="votelinks">
+                  <a
+                    onClick={() => handleVoteComment(comment.id)}
+                    style={{ cursor: 'pointer' }}
+                    title={comment.user_voted ? 'unvote' : 'upvote'}
+                  >
+                    <div className={comment.user_voted ? 'votearrow rotate180' : 'votearrow'} />
+                  </a>
                 </td>
                 {/* Main comment content */}
                 <td className="default" style={{ width: '100%' }}>
