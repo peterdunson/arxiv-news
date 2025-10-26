@@ -205,7 +205,7 @@ export default function PaperDetail() {
                   />
                 </td>
                 {/* Vote column */}
-                <td style={{ verticalAlign: 'middle', paddingRight: '3px' }} className="votelinks">
+                <td style={{ verticalAlign: 'top', paddingRight: '0px' }} className="votelinks">
                   <a
                     onClick={() => handleVoteComment(comment.id)}
                     style={{ cursor: 'pointer' }}
