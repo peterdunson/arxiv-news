@@ -18,7 +18,7 @@ export default function PaperFeed() {
 
   useEffect(() => {
     loadPapers();
-  }, [sortBy, searchQuery]);
+  }, [searchQuery]);
 
   useEffect(() => {
     filterAndSortPapers();
