@@ -148,6 +148,17 @@ export default function PaperFeed() {
   };
 
   const getSortName = (sort) => {
+    // When searching, don't show "Last 7 Days" since search results are all-time
+    if (searchQuery) {
+      const searchNames = {
+        'new': 'Newest Papers',
+        'hot': 'Most Upvoted',
+        'discussed': 'Most Discussed'
+      };
+      return searchNames[sort] || 'Most Upvoted';
+    }
+
+    // Regular feed shows "Last 7 Days"
     const names = {
       'new': 'Newest Papers (Last 7 Days)',
       'hot': 'Most Upvoted (Last 7 Days)',
