@@ -96,10 +96,15 @@ export default function PaperFeed() {
         .filter(p => new Date(p.published) >= oneWeekAgo)
         .sort((a, b) => b.comment_count - a.comment_count);
     } else if (sortBy === 'new') {
-      // Sort by publication date (newest first) - show all papers
-      filtered = [...filtered].sort((a, b) => 
-        new Date(b.published).getTime() - new Date(a.published).getTime()
-      );
+      // Filter to last 7 days, then sort by publication date (newest first)
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      filtered = filtered
+        .filter(p => new Date(p.published) >= oneWeekAgo)
+        .sort((a, b) =>
+          new Date(b.published).getTime() - new Date(a.published).getTime()
+        );
     }
     
     setFilteredPapers(filtered);
