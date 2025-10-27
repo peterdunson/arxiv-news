@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getPapers } from '../api';
+import { getPapers, searchPapers } from '../api';
 import PaperCard from './PaperCard';
 import { CATEGORY_MAP, ALL_CATEGORIES } from '../utils/categories';
 
@@ -18,7 +18,7 @@ export default function PaperFeed() {
 
   useEffect(() => {
     loadPapers();
-  }, [sortBy]);
+  }, [sortBy, searchQuery]);
 
   useEffect(() => {
     filterAndSortPapers();
@@ -27,10 +27,16 @@ export default function PaperFeed() {
   const loadPapers = async () => {
     setLoading(true);
     try {
-      // Map sort parameter to API sort parameter
-      const apiSort = sortBy === 'hot' ? 'votes' : sortBy === 'discussed' ? 'comments' : 'recent';
-      const data = await getPapers(apiSort, 15000); // Fetch more papers to show all available
-      setPapers(data);
+      // If searching, use search endpoint to find papers across all time
+      if (searchQuery) {
+        const data = await searchPapers(searchQuery, 1000);
+        setPapers(data);
+      } else {
+        // Otherwise fetch from last 7 days
+        const apiSort = sortBy === 'hot' ? 'votes' : sortBy === 'discussed' ? 'comments' : 'recent';
+        const data = await getPapers(apiSort, 15000);
+        setPapers(data);
+      }
     } catch (error) {
       console.error('Failed to load papers:', error);
     }

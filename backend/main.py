@@ -526,6 +526,90 @@ def get_paper(arxiv_id: str, db: Session = Depends(get_db)):
         "doi": paper.doi
     }
 
+@app.get("/search", response_model=List[PaperResponse])
+def search_papers(
+    q: str,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Search all papers (across all time) by title, abstract, authors, etc."""
+    if not q or len(q.strip()) == 0:
+        return []
+
+    search_term = q.lower().strip()
+
+    # Get all papers
+    all_papers = db.query(Paper).all()
+
+    # Client-side filtering to search across multiple fields
+    matching_papers = []
+    for paper in all_papers:
+        try:
+            # Search in title
+            if search_term in paper.title.lower():
+                matching_papers.append(paper)
+                continue
+
+            # Search in abstract
+            if paper.abstract and search_term in paper.abstract.lower():
+                matching_papers.append(paper)
+                continue
+
+            # Search in authors
+            if paper.authors:
+                try:
+                    authors = json.loads(paper.authors)
+                    if isinstance(authors, list):
+                        for author in authors:
+                            if search_term in author.lower():
+                                matching_papers.append(paper)
+                                break
+                    elif isinstance(authors, str):
+                        if search_term in authors.lower():
+                            matching_papers.append(paper)
+                except:
+                    pass
+        except Exception as e:
+            print(f"Error searching paper {paper.arxiv_id}: {e}")
+            continue
+
+    # Sort by relevance (title matches first, then vote count)
+    def relevance_score(paper):
+        score = 0
+        if search_term in paper.title.lower():
+            score += 100  # Title match gets highest priority
+        if paper.abstract and search_term in paper.abstract.lower():
+            score += 50   # Abstract match gets lower priority
+        score += paper.vote_count  # Then sort by votes
+        return score
+
+    matching_papers.sort(key=relevance_score, reverse=True)
+
+    # Limit results
+    matching_papers = matching_papers[:limit]
+
+    # Convert to response format
+    result = []
+    for paper in matching_papers:
+        paper_dict = {
+            "id": paper.id,
+            "arxiv_id": paper.arxiv_id,
+            "title": paper.title,
+            "authors": json.loads(paper.authors),
+            "abstract": paper.abstract,
+            "pdf_url": paper.pdf_url,
+            "arxiv_url": paper.arxiv_url,
+            "published": paper.published,
+            "categories": json.loads(paper.categories),
+            "primary_category": paper.primary_category,
+            "vote_count": paper.vote_count,
+            "comment_count": paper.comment_count,
+            "created_at": paper.created_at.isoformat()
+        }
+        result.append(PaperResponse(**paper_dict))
+
+    return result
+
 @app.post("/papers/{arxiv_id}/vote")
 def vote_paper(
     arxiv_id: str,

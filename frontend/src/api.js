@@ -68,6 +68,14 @@ export const getPapers = async (sort = 'votes', limit = 15000) => {
   return response.data;
 };
 
+export const searchPapers = async (query, limit = 100) => {
+  const response = await axios.get(`${API_BASE}/search`, {
+    params: { q: query, limit },
+    headers: getAuthHeader()
+  });
+  return response.data;
+};
+
 export const getPaper = async (arxivId) => {
   const response = await axios.get(`${API_BASE}/papers/${arxivId}`, {
     headers: getAuthHeader()
