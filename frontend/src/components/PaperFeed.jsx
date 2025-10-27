@@ -130,7 +130,7 @@ export default function PaperFeed() {
 
   const getSortName = (sort) => {
     const names = {
-      'new': 'Newest Papers',
+      'new': 'Newest Papers (Last 7 Days)',
       'hot': 'Most Upvoted (Last 7 Days)',
       'discussed': 'Most Discussed (Last 7 Days)'
     };
