@@ -84,33 +84,46 @@ export default function PaperFeed() {
       );
     }
     
-    // Client-side sorting
-    if (sortBy === 'hot') {
-      // Filter to last 7 days, then sort by votes (highest first)
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      
-      filtered = filtered
-        .filter(p => new Date(p.published) >= oneWeekAgo)
-        .sort((a, b) => b.vote_count - a.vote_count);
-    } else if (sortBy === 'discussed') {
-      // Filter to last 7 days, then sort by comments (most discussed first)
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      
-      filtered = filtered
-        .filter(p => new Date(p.published) >= oneWeekAgo)
-        .sort((a, b) => b.comment_count - a.comment_count);
-    } else if (sortBy === 'new') {
-      // Filter to last 7 days, then sort by publication date (newest first)
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    // Client-side sorting (only apply 7-day filter if NOT searching)
+    if (!searchQuery) {
+      if (sortBy === 'hot') {
+        // Filter to last 7 days, then sort by votes (highest first)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      filtered = filtered
-        .filter(p => new Date(p.published) >= oneWeekAgo)
-        .sort((a, b) =>
+        filtered = filtered
+          .filter(p => new Date(p.published) >= oneWeekAgo)
+          .sort((a, b) => b.vote_count - a.vote_count);
+      } else if (sortBy === 'discussed') {
+        // Filter to last 7 days, then sort by comments (most discussed first)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        filtered = filtered
+          .filter(p => new Date(p.published) >= oneWeekAgo)
+          .sort((a, b) => b.comment_count - a.comment_count);
+      } else if (sortBy === 'new') {
+        // Filter to last 7 days, then sort by publication date (newest first)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        filtered = filtered
+          .filter(p => new Date(p.published) >= oneWeekAgo)
+          .sort((a, b) =>
+            new Date(b.published).getTime() - new Date(a.published).getTime()
+          );
+      }
+    } else {
+      // When searching, sort by the selected method (hot/discussed/new) without 7-day filter
+      if (sortBy === 'hot') {
+        filtered = filtered.sort((a, b) => b.vote_count - a.vote_count);
+      } else if (sortBy === 'discussed') {
+        filtered = filtered.sort((a, b) => b.comment_count - a.comment_count);
+      } else if (sortBy === 'new') {
+        filtered = filtered.sort((a, b) =>
           new Date(b.published).getTime() - new Date(a.published).getTime()
         );
+      }
     }
     
     setFilteredPapers(filtered);
