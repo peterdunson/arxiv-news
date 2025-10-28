@@ -55,9 +55,9 @@ export default function SubmitPost() {
 
   return (
     <tr>
-      <td style={{ padding: '20px' }}>
+      <td style={{ padding: '20px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
         <form onSubmit={handleSubmit}>
-          <table style={{ border: '0' }}>
+          <table style={{ border: '0', fontFamily: 'Verdana, Geneva, sans-serif' }}>
             <tbody>
               <tr>
                 <td style={{ paddingBottom: '10px' }}>
@@ -72,7 +72,7 @@ export default function SubmitPost() {
                 </tr>
               )}
               <tr>
-                <td style={{ paddingBottom: '5px' }}>
+                <td style={{ paddingBottom: '5px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                   <b>title</b>
                 </td>
               </tr>
@@ -95,7 +95,7 @@ export default function SubmitPost() {
                 </td>
               </tr>
               <tr>
-                <td style={{ paddingBottom: '5px' }}>
+                <td style={{ paddingBottom: '5px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                   <b>url</b>
                 </td>
               </tr>
@@ -119,7 +119,7 @@ export default function SubmitPost() {
                 </td>
               </tr>
               <tr>
-                <td style={{ paddingBottom: '5px' }}>
+                <td style={{ paddingBottom: '5px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                   <b>or text</b>
                 </td>
               </tr>
