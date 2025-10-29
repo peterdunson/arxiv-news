@@ -226,17 +226,17 @@ def get_status(db: Session = Depends(get_db)):
 
 @app.get("/sitemap.xml")
 def get_sitemap(db: Session = Depends(get_db)):
-    """Generate sitemap for SEO"""
+    """Generate clean sitemap with only canonical URLs"""
     from fastapi.responses import Response
     from datetime import datetime
 
-    # Get all papers, not just the last 1000
-    papers = db.query(Paper).order_by(Paper.created_at.desc()).all()
+    # Get all papers
+    papers = db.query(Paper).order_by(Paper.created_at.desc()).limit(10000).all()
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
-    # Homepage
+    # Homepage ONLY - no query params
     xml += '  <url>\n'
     xml += '    <loc>https://arxiv-news.com/</loc>\n'
     xml += '    <changefreq>hourly</changefreq>\n'
@@ -244,42 +244,46 @@ def get_sitemap(db: Session = Depends(get_db)):
     xml += f'    <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>\n'
     xml += '  </url>\n'
 
-    # Main sort pages
-    sort_pages = [
-        ('hot', 1.0, 'hourly'),
-        ('new', 0.9, 'hourly'),
-        ('discussed', 0.9, 'hourly'),
-    ]
-    for sort_type, priority, freq in sort_pages:
-        xml += '  <url>\n'
-        xml += f'    <loc>https://arxiv-news.com/?sort={sort_type}</loc>\n'
-        xml += f'    <changefreq>{freq}</changefreq>\n'
-        xml += f'    <priority>{priority}</priority>\n'
-        xml += f'    <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>\n'
-        xml += '  </url>\n'
+    # Show page
+    xml += '  <url>\n'
+    xml += '    <loc>https://arxiv-news.com/show</loc>\n'
+    xml += '    <changefreq>daily</changefreq>\n'
+    xml += '    <priority>0.8</priority>\n'
+    xml += f'    <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>\n'
+    xml += '  </url>\n'
 
-    # Category pages
-    categories = ['all', 'cs.AI', 'cs.LG', 'cs.CV', 'cs.CL', 'cs.RO', 'stat.ML', 'math', 'physics', 'quant-ph']
-    for cat in categories:
-        xml += '  <url>\n'
-        xml += f'    <loc>https://arxiv-news.com/?sort=hot&cat={cat}</loc>\n'
-        xml += '    <changefreq>daily</changefreq>\n'
-        xml += '    <priority>0.8</priority>\n'
-        xml += f'    <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>\n'
-        xml += '  </url>\n'
-
-    # Paper pages
+    # Paper pages - CLEAN URLs ONLY
     for paper in papers:
         xml += '  <url>\n'
         xml += f'    <loc>https://arxiv-news.com/paper/{paper.arxiv_id}</loc>\n'
         xml += f'    <lastmod>{paper.created_at.strftime("%Y-%m-%d")}</lastmod>\n'
         xml += '    <changefreq>weekly</changefreq>\n'
-        xml += '    <priority>0.6</priority>\n'
+        xml += '    <priority>0.7</priority>\n'
         xml += '  </url>\n'
 
     xml += '</urlset>'
 
     return Response(content=xml, media_type="application/xml")
+
+@app.get("/robots.txt")
+def get_robots():
+    """Serve robots.txt"""
+    from fastapi.responses import Response
+
+    robots = """User-agent: *
+Allow: /
+Allow: /paper/*
+Allow: /show
+Disallow: /login
+Disallow: /register
+Disallow: /submit
+Disallow: /*?*sort=*
+Disallow: /*?*cat=*
+Disallow: /*?*q=*
+
+Sitemap: https://arxiv-news.com/sitemap.xml
+"""
+    return Response(content=robots, media_type="text/plain")
 
 @app.post("/admin/scrape")
 def manual_scrape(max_results: int = 500, db: Session = Depends(get_db)):

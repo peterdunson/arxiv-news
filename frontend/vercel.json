@@ -4,10 +4,32 @@
   "framework": "vite",
   "installCommand": "npm install --legacy-peer-deps",
   "devCommand": "npm run dev",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/paper/:arxivId/",
+      "destination": "/paper/:arxivId",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",
       "destination": "https://arxiv-news-api-production.up.railway.app/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "https://arxiv-news-api-production.up.railway.app/robots.txt"
     },
     {
       "source": "/(.*)",

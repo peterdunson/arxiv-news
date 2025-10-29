@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { getPapers, searchPapers } from '../api';
 import PaperCard from './PaperCard';
 import { CATEGORY_MAP, ALL_CATEGORIES } from '../utils/categories';
@@ -15,6 +16,9 @@ export default function PaperFeed() {
   const [filteredPapers, setFilteredPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+
+  // Check if we have any query parameters
+  const hasQueryParams = searchParams.toString().length > 0;
 
   useEffect(() => {
     loadPapers();
@@ -191,8 +195,23 @@ export default function PaperFeed() {
   const hasMore = filteredPapers.length > displayedPapers.length;
 
   return (
-    <tr>
-      <td style={{ padding: '0px' }}>
+    <>
+      <Helmet>
+        {/* Always point canonical to clean homepage */}
+        <link rel="canonical" href="https://arxiv-news.com/" />
+
+        {/* If there are filters/sort/search, don't index this variation */}
+        {hasQueryParams ? (
+          <meta name="robots" content="noindex, follow" />
+        ) : (
+          <meta name="robots" content="index, follow" />
+        )}
+
+        <meta name="description" content="Discover and discuss the latest research papers from arXiv in AI, ML, physics, math and more." />
+      </Helmet>
+
+      <tr>
+        <td style={{ padding: '0px' }}>
         <table
           style={{
             border: '0px',
@@ -249,6 +268,7 @@ export default function PaperFeed() {
           </tbody>
         </table>
       </td>
-    </tr>
+      </tr>
+    </>
   );
 }
