@@ -96,12 +96,12 @@ export default function PostDetail() {
 
   return (
     <tr>
-      <td style={{ padding: '20px' }}>
-        <table style={{ border: '0' }}>
+      <td style={{ padding: '20px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
+        <table style={{ border: '0', fontFamily: 'Verdana, Geneva, sans-serif' }}>
           <tbody>
             <tr>
               <td>
-                <span style={{ fontSize: '12pt', fontWeight: 'bold' }}>
+                <span style={{ fontSize: '12pt', fontWeight: 'bold', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                   {post.url ? (
                     <a href={post.url} target="_blank" rel="noopener noreferrer">
                       {post.title}
@@ -113,7 +113,7 @@ export default function PostDetail() {
               </td>
             </tr>
             <tr>
-              <td style={{ paddingTop: '5px', fontSize: '9pt', color: '#828282' }}>
+              <td style={{ paddingTop: '5px', fontSize: '9pt', color: '#828282', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                 {post.vote_count} points by{' '}
                 <Link to={`/user/${post.username}`}>{post.username}</Link>{' '}
                 {formatTimeAgo(post.created_at)}
@@ -121,8 +121,8 @@ export default function PostDetail() {
             </tr>
             {post.text && (
               <tr>
-                <td style={{ paddingTop: '15px', paddingBottom: '15px' }}>
-                  <div style={{ whiteSpace: 'pre-wrap', fontSize: '10pt' }}>
+                <td style={{ paddingTop: '15px', paddingBottom: '15px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                  <div style={{ whiteSpace: 'pre-wrap', fontSize: '10pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                     {post.text}
                   </div>
                 </td>
@@ -132,7 +132,7 @@ export default function PostDetail() {
         </table>
 
         {/* Add comment form */}
-        <form onSubmit={handleAddComment} style={{ marginTop: '20px', marginBottom: '20px' }}>
+        <form onSubmit={handleAddComment} style={{ marginTop: '20px', marginBottom: '20px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
@@ -164,24 +164,24 @@ export default function PostDetail() {
         </form>
 
         {/* Comments */}
-        <div style={{ marginTop: '20px' }}>
+        <div style={{ marginTop: '20px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
           {comments.length === 0 ? (
-            <p style={{ color: '#828282', fontSize: '10pt' }}>No comments yet.</p>
+            <p style={{ color: '#828282', fontSize: '10pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>No comments yet.</p>
           ) : (
             comments.map((comment) => (
-              <table key={comment.id} style={{ border: '0', marginBottom: '15px', width: '100%' }}>
+              <table key={comment.id} style={{ border: '0', marginBottom: '15px', width: '100%', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                 <tbody>
                   <tr>
                     <td style={{ verticalAlign: 'top', paddingRight: '8px', width: '20px' }}>
                       <div style={{ width: '10px', height: '10px' }} />
                     </td>
                     <td>
-                      <table style={{ border: '0' }}>
+                      <table style={{ border: '0', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                         <tbody>
                           <tr>
-                            <td className="default">
-                              <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
-                                <span className="comhead">
+                            <td className="default" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                              <div style={{ marginTop: '2px', marginBottom: '-10px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                                <span className="comhead" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
                                   <Link to={`/user/${comment.username}`}>{comment.username}</Link>{' '}
                                   <span className="age">
                                     {formatTimeAgo(comment.created_at)}
@@ -189,9 +189,9 @@ export default function PostDetail() {
                                 </span>
                               </div>
                               <br />
-                              <div className="comment">
-                                <span className="commtext c00">
-                                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                              <div className="comment" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                                <span className="commtext c00" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                                  <div style={{ whiteSpace: 'pre-wrap', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                                     {comment.content}
                                   </div>
                                 </span>
@@ -208,7 +208,7 @@ export default function PostDetail() {
           )}
         </div>
 
-        <p style={{ marginTop: '20px' }}>
+        <p style={{ marginTop: '20px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
           <Link to="/show">← back to show</Link>
         </p>
       </td>
