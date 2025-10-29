@@ -122,7 +122,7 @@ export default function PostDetail() {
             {post.text && (
               <tr>
                 <td style={{ paddingTop: '15px', paddingBottom: '15px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                  <div style={{ whiteSpace: 'pre-wrap', fontSize: '10pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                  <div style={{ whiteSpace: 'pre-wrap', fontSize: '9pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
                     {post.text}
                   </div>
                 </td>
