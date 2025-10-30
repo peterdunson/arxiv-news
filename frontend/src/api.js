@@ -168,3 +168,20 @@ export const addPostComment = async (postId, content) => {
   );
   return response.data;
 };
+
+export const votePostComment = async (commentId) => {
+  const response = await axios.post(
+    `${API_BASE}/post-comments/${commentId}/vote`,
+    {},
+    { headers: getAuthHeader() }
+  );
+  return response.data;
+};
+
+export const deletePostComment = async (commentId) => {
+  const response = await axios.delete(
+    `${API_BASE}/post-comments/${commentId}`,
+    { headers: getAuthHeader() }
+  );
+  return response.data;
+};

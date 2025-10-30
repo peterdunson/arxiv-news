@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPost, getPostComments, addPostComment } from '../api';
+import { getPost, getPostComments, addPostComment, votePostComment, deletePostComment } from '../api';
 
 export default function PostDetail() {
   const { postId } = useParams();
@@ -10,6 +10,8 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
+  const [replyTo, setReplyTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
     loadPost();
@@ -66,6 +68,57 @@ export default function PostDetail() {
     setCommentLoading(false);
   };
 
+  const handleVoteComment = async (commentId) => {
+    try {
+      await votePostComment(commentId);
+      await loadComments();
+    } catch (error) {
+      console.error('Failed to vote on comment:', error);
+      if (error.response?.status === 401) {
+        alert('Please login to vote');
+        navigate('/login');
+      }
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Delete this comment?')) return;
+    try {
+      await deletePostComment(commentId);
+      await loadComments();
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      if (error.response?.status === 401) {
+        alert('Please login to delete');
+        navigate('/login');
+      }
+    }
+  };
+
+  const handleReply = async (e, commentId) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      alert('Please login to reply');
+      navigate('/login');
+      return;
+    }
+
+    setCommentLoading(true);
+    try {
+      await addPostComment(postId, replyText);
+      setReplyText('');
+      setReplyTo(null);
+      await loadComments();
+    } catch (error) {
+      console.error('Failed to add reply:', error);
+      alert('Failed to add reply. Please try again.');
+    }
+    setCommentLoading(false);
+  };
+
   const formatTimeAgo = (dateStr) => {
     const now = new Date();
     const published = new Date(dateStr);
@@ -77,6 +130,120 @@ export default function PostDetail() {
     if (diffInDays < 30) return `${diffInDays} days ago`;
     const diffInMonths = Math.floor(diffInDays / 30);
     return `${diffInMonths} months ago`;
+  };
+
+  const renderComment = (comment, index = 0) => {
+    const commentRow = (
+      <tr key={comment.id} className="athing comtr">
+        <td style={{ padding: '0' }}>
+          <table style={{ border: '0', width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              <tr>
+                {/* Main comment content */}
+                <td className="default" style={{ width: '100%' }}>
+                  <div style={{ marginTop: '2px', marginBottom: '-10px' }}>
+                    <span className="comhead">
+                      <span style={{ color: '#828282' }}>
+                        {index + 1}
+                        {' | '}
+                      </span>
+                      <Link
+                        to={`/user/${comment.username}`}
+                        className="hnuser"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        {comment.username}
+                      </Link>
+                      <span className="age">
+                        {' '}
+                        {formatTimeAgo(comment.created_at)}
+                      </span>
+                      {' | '}
+                      <a
+                        onClick={() => handleVoteComment(comment.id)}
+                        style={{ cursor: 'pointer', color: '#828282' }}
+                      >
+                        {comment.user_voted ? 'unvote' : 'upvote'}
+                      </a>
+                      {' | '}
+                      <span className="score">{comment.vote_count} points</span>
+                    </span>
+                  </div>
+                  <br />
+                  <div className="comment">
+                    <span className="c00">
+                      <span>{comment.content}</span>
+                      <div className="reply">
+                        <p style={{ fontSize: '1' }}>
+                          <u>
+                            <a
+                              onClick={() => setReplyTo(comment.id)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              reply
+                            </a>
+                          </u>
+                          {localStorage.getItem('currentUser') &&
+                           comment.username === JSON.parse(localStorage.getItem('currentUser')).username && (
+                            <>
+                              {' | '}
+                              <u>
+                                <a
+                                  onClick={() => handleDeleteComment(comment.id)}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  delete
+                                </a>
+                              </u>
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </span>
+                  </div>
+
+                  {/* Reply form */}
+                  {replyTo === comment.id && (
+                    <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                      <form onSubmit={(e) => handleReply(e, comment.id)}>
+                        <textarea
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Add a reply..."
+                          rows="4"
+                          cols="60"
+                          required
+                          style={{ marginBottom: '8px' }}
+                        />
+                        <br />
+                        <br />
+                        <input
+                          type="submit"
+                          value={commentLoading ? 'Replying...' : 'reply'}
+                          disabled={commentLoading}
+                          style={{ cursor: 'pointer', marginRight: '5px' }}
+                        />
+                        <input
+                          type="button"
+                          value="cancel"
+                          onClick={() => {
+                            setReplyTo(null);
+                            setReplyText('');
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </form>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    );
+
+    return commentRow;
   };
 
   if (loading) {
@@ -164,49 +331,19 @@ export default function PostDetail() {
         </form>
 
         {/* Comments */}
-        <div style={{ marginTop: '20px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
-          {comments.length === 0 ? (
-            <p style={{ color: '#828282', fontSize: '10pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>No comments yet.</p>
-          ) : (
-            comments.map((comment) => (
-              <table key={comment.id} style={{ border: '0', marginBottom: '15px', width: '100%', fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                <tbody>
-                  <tr>
-                    <td style={{ verticalAlign: 'top', paddingRight: '8px', width: '20px' }}>
-                      <div style={{ width: '10px', height: '10px' }} />
-                    </td>
-                    <td>
-                      <table style={{ border: '0', fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                        <tbody>
-                          <tr>
-                            <td className="default" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                              <div style={{ marginTop: '2px', marginBottom: '-10px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                                <span className="comhead" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                                  <Link to={`/user/${comment.username}`}>{comment.username}</Link>{' '}
-                                  <span className="age">
-                                    {formatTimeAgo(comment.created_at)}
-                                  </span>
-                                </span>
-                              </div>
-                              <br />
-                              <div className="comment" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                                <span className="commtext c00" style={{ fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                                  <div style={{ whiteSpace: 'pre-wrap', fontFamily: 'Verdana, Geneva, sans-serif' }}>
-                                    {comment.content}
-                                  </div>
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            ))
-          )}
-        </div>
+        <table style={{ border: '0', width: '100%', marginTop: '20px' }}>
+          <tbody>
+            {comments.length === 0 ? (
+              <tr>
+                <td style={{ color: '#828282', fontSize: '10pt', fontFamily: 'Verdana, Geneva, sans-serif' }}>
+                  No comments yet.
+                </td>
+              </tr>
+            ) : (
+              comments.map((comment, index) => renderComment(comment, index))
+            )}
+          </tbody>
+        </table>
 
         <p style={{ marginTop: '20px', fontFamily: 'Verdana, Geneva, sans-serif' }}>
           <Link to="/show">← back to show</Link>
