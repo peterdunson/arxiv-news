@@ -381,8 +381,14 @@ export default function PaperDetail() {
             "@type": "DiscussionForumPosting",
             "headline": paper.title,
             "description": pageDescription,
+            "text": paper.abstract,
             "url": pageUrl,
             "discussionUrl": pageUrl,
+            "datePublished": paper.published || paper.created_at,
+            "author": {
+              "@type": "Person",
+              "name": Array.isArray(paper.authors) && paper.authors.length > 0 ? paper.authors[0] : "arXiv Author"
+            },
             "commentCount": comments.length,
             "interactionStatistic": {
               "@type": "InteractionCounter",
