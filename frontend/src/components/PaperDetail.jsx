@@ -387,7 +387,8 @@ export default function PaperDetail() {
             "datePublished": paper.published || paper.created_at,
             "author": {
               "@type": "Person",
-              "name": Array.isArray(paper.authors) && paper.authors.length > 0 ? paper.authors[0] : "arXiv Author"
+              "name": Array.isArray(paper.authors) && paper.authors.length > 0 ? paper.authors[0] : "arXiv Author",
+              "url": paper.arxiv_url
             },
             "commentCount": comments.length,
             "interactionStatistic": {
